@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func validate(info *npool.DetailReq) error { //nolint
+func validate(info *npool.DetailReq) error {
 	if info.GoodID == nil {
 		logger.Sugar().Errorw("validate", "GoodID", info.GoodID)
 		return status.Error(codes.InvalidArgument, "GoodID is empty")
@@ -48,7 +48,7 @@ func validate(info *npool.DetailReq) error { //nolint
 
 	if info.BenefitDate == nil || info.GetBenefitDate() == 0 {
 		logger.Sugar().Errorw("validate", "BenefitDate", info.BenefitDate)
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("FromOldID is invalid"))
+		return status.Error(codes.InvalidArgument, "FromOldID is invalid")
 	}
 
 	return nil

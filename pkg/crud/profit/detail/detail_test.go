@@ -30,44 +30,26 @@ func init() {
 }
 
 var entity = ent.Detail{
-	ID:              uuid.New(),
-	AppID:           uuid.New(),
-	UserID:          uuid.New(),
-	CoinTypeID:      uuid.New(),
-	IoType:          npool.IOType_Incoming.String(),
-	IoSubType:       npool.IOSubType_Payment.String(),
-	Amount:          decimal.RequireFromString("9999999999999999999.999999999999999999"),
-	FromCoinTypeID:  uuid.New(),
-	CoinUsdCurrency: decimal.RequireFromString("1.00045000000123012"),
-	IoExtra:         uuid.New().String(),
-	FromOldID:       uuid.New(),
+	ID:          uuid.New(),
+	GoodID:      uuid.New(),
+	CoinTypeID:  uuid.New(),
+	Amount:      decimal.RequireFromString("9999999999999999999.999999999999999999"),
+	BenefitDate: uint32(time.Now().Unix()),
 }
 
 var (
-	id              = entity.ID.String()
-	appID           = entity.AppID.String()
-	userID          = entity.UserID.String()
-	coinTypeID      = entity.CoinTypeID.String()
-	ioType          = npool.IOType(npool.IOType_value[entity.IoType])
-	ioSubType       = npool.IOSubType(npool.IOSubType_value[entity.IoSubType])
-	amount          = entity.Amount.String()
-	fromCoinTypeID  = entity.FromCoinTypeID.String()
-	coinUSDCurrency = entity.CoinUsdCurrency.String()
-	ioExtra         = entity.IoExtra
-	fromOldID       = entity.FromOldID.String()
+	id          = entity.ID.String()
+	goodID      = entity.GoodID.String()
+	coinTypeID  = entity.CoinTypeID.String()
+	amount      = entity.Amount.String()
+	benefitDate = entity.BenefitDate
 
 	req = npool.DetailReq{
-		ID:              &id,
-		AppID:           &appID,
-		UserID:          &userID,
-		CoinTypeID:      &coinTypeID,
-		IOType:          &ioType,
-		IOSubType:       &ioSubType,
-		Amount:          &amount,
-		FromCoinTypeID:  &fromCoinTypeID,
-		CoinUSDCurrency: &coinUSDCurrency,
-		IOExtra:         &ioExtra,
-		FromOldID:       &fromOldID,
+		ID:          &id,
+		GoodID:      &goodID,
+		CoinTypeID:  &coinTypeID,
+		Amount:      &amount,
+		BenefitDate: &benefitDate,
 	}
 )
 
@@ -86,59 +68,35 @@ func create(t *testing.T) {
 func createBulk(t *testing.T) {
 	entities := []*ent.Detail{
 		{
-			ID:              uuid.New(),
-			AppID:           uuid.New(),
-			UserID:          uuid.New(),
-			CoinTypeID:      uuid.New(),
-			IoType:          npool.IOType_Incoming.String(),
-			IoSubType:       npool.IOSubType_Payment.String(),
-			Amount:          decimal.RequireFromString("10.00896"),
-			FromCoinTypeID:  uuid.New(),
-			CoinUsdCurrency: decimal.RequireFromString("1.8902"),
-			IoExtra:         uuid.New().String(),
-			FromOldID:       uuid.New(),
+			ID:          uuid.New(),
+			GoodID:      uuid.New(),
+			CoinTypeID:  uuid.New(),
+			Amount:      decimal.RequireFromString("10.00896"),
+			BenefitDate: uint32(time.Now().Unix()),
 		},
 		{
-			ID:              uuid.New(),
-			AppID:           uuid.New(),
-			UserID:          uuid.New(),
-			CoinTypeID:      uuid.New(),
-			IoType:          npool.IOType_Incoming.String(),
-			IoSubType:       npool.IOSubType_Payment.String(),
-			Amount:          decimal.RequireFromString("11.11111"),
-			FromCoinTypeID:  uuid.New(),
-			CoinUsdCurrency: decimal.RequireFromString("1.123"),
-			IoExtra:         uuid.New().String(),
-			FromOldID:       uuid.New(),
+			ID:          uuid.New(),
+			GoodID:      uuid.New(),
+			CoinTypeID:  uuid.New(),
+			Amount:      decimal.RequireFromString("11.11111"),
+			BenefitDate: uint32(time.Now().Unix()),
 		},
 	}
 
 	reqs := []*npool.DetailReq{}
 	for _, _entity := range entities {
 		_id := _entity.ID.String()
-		_appID := _entity.AppID.String()
-		_userID := _entity.UserID.String()
+		_goodID := _entity.GoodID.String()
 		_coinTypeID := _entity.CoinTypeID.String()
-		_ioType := npool.IOType(npool.IOType_value[_entity.IoType])
-		_ioSubType := npool.IOSubType(npool.IOSubType_value[_entity.IoSubType])
 		_amount := _entity.Amount.String()
-		_fromCoinTypeID := entity.FromCoinTypeID.String()
-		_coinUSDCurrency := _entity.CoinUsdCurrency.String()
-		_ioExtra := _entity.IoExtra
-		_fromOldID := _entity.FromOldID.String()
+		_benefitDate := _entity.BenefitDate
 
 		reqs = append(reqs, &npool.DetailReq{
-			ID:              &_id,
-			AppID:           &_appID,
-			UserID:          &_userID,
-			CoinTypeID:      &_coinTypeID,
-			IOType:          &_ioType,
-			IOSubType:       &_ioSubType,
-			Amount:          &_amount,
-			FromCoinTypeID:  &_fromCoinTypeID,
-			CoinUSDCurrency: &_coinUSDCurrency,
-			IOExtra:         &_ioExtra,
-			FromOldID:       &_fromOldID,
+			ID:          &_id,
+			GoodID:      &_goodID,
+			CoinTypeID:  &_coinTypeID,
+			Amount:      &_amount,
+			BenefitDate: &_benefitDate,
 		})
 	}
 	infos, err := CreateBulk(context.Background(), reqs)

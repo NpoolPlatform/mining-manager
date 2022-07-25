@@ -31,34 +31,28 @@ func init() {
 
 var entity = ent.General{
 	ID:         uuid.New(),
-	AppID:      uuid.New(),
-	UserID:     uuid.New(),
+	GoodID:     uuid.New(),
 	CoinTypeID: uuid.New(),
-	Incoming:   decimal.NewFromInt(0),
-	Locked:     decimal.NewFromInt(0),
-	Outcoming:  decimal.NewFromInt(0),
-	Spendable:  decimal.NewFromInt(0),
+	Amount:     decimal.NewFromInt(0),
+	ToPlatform: decimal.NewFromInt(0),
+	ToUser:     decimal.NewFromInt(0),
 }
 
 var (
 	id         = entity.ID.String()
-	appID      = entity.AppID.String()
-	userID     = entity.UserID.String()
+	appID      = entity.GoodID.String()
 	coinTypeID = entity.CoinTypeID.String()
-	incoming   = entity.Incoming.String()
-	locked     = entity.Locked.String()
-	outcoming  = entity.Outcoming.String()
-	spendable  = entity.Spendable.String()
+	amount     = entity.Amount.String()
+	toPlatform = entity.ToPlatform.String()
+	toUser     = entity.ToUser.String()
 
 	req = npool.GeneralReq{
 		ID:         &id,
-		AppID:      &appID,
-		UserID:     &userID,
+		GoodID:     &appID,
 		CoinTypeID: &coinTypeID,
-		Incoming:   &incoming,
-		Locked:     &locked,
-		Outcoming:  &outcoming,
-		Spendable:  &spendable,
+		Amount:     &amount,
+		ToPlatform: &toPlatform,
+		ToUser:     &toUser,
 	}
 )
 
@@ -78,30 +72,26 @@ func createBulk(t *testing.T) {
 	entities := []*ent.General{
 		{
 			ID:         uuid.New(),
-			AppID:      uuid.New(),
-			UserID:     uuid.New(),
+			GoodID:     uuid.New(),
 			CoinTypeID: uuid.New(),
-			Incoming:   decimal.NewFromInt(0),
-			Locked:     decimal.NewFromInt(0),
-			Outcoming:  decimal.NewFromInt(0),
-			Spendable:  decimal.NewFromInt(0),
+			Amount:     decimal.NewFromInt(0),
+			ToPlatform: decimal.NewFromInt(0),
+			ToUser:     decimal.NewFromInt(0),
 		},
 		{
 			ID:         uuid.New(),
-			AppID:      uuid.New(),
-			UserID:     uuid.New(),
+			GoodID:     uuid.New(),
 			CoinTypeID: uuid.New(),
-			Incoming:   decimal.NewFromInt(0),
-			Locked:     decimal.NewFromInt(0),
-			Outcoming:  decimal.NewFromInt(0),
-			Spendable:  decimal.NewFromInt(0),
+			Amount:     decimal.NewFromInt(0),
+			ToPlatform: decimal.NewFromInt(0),
+			ToUser:     decimal.NewFromInt(0),
 		},
 	}
 
 	reqs := []*npool.GeneralReq{}
 	for _, _entity := range entities {
 		_id := _entity.ID.String()
-		_appID := _entity.AppID.String()
+		_goodID := _entity.GoodID.String()
 		_userID := _entity.UserID.String()
 		_coinTypeID := _entity.CoinTypeID.String()
 		_incoming := _entity.Incoming.String()
@@ -111,13 +101,11 @@ func createBulk(t *testing.T) {
 
 		reqs = append(reqs, &npool.GeneralReq{
 			ID:         &_id,
-			AppID:      &_appID,
-			UserID:     &_userID,
+			GoodID:     &_goodID,
 			CoinTypeID: &_coinTypeID,
-			Incoming:   &_incoming,
-			Locked:     &_locked,
-			Outcoming:  &_outcoming,
-			Spendable:  &_spendable,
+			Amount:     &_incoming,
+			ToPlatform: &_locked,
+			ToUser:     &_outcoming,
 		})
 	}
 	infos, err := CreateBulk(context.Background(), reqs)
@@ -127,20 +115,17 @@ func createBulk(t *testing.T) {
 }
 
 func add(t *testing.T) {
-	incoming = "30"
-	locked = "10"
-	outcoming = "10"
-	spendable = "10"
+	amount = "30"
+	toPlatform = "10"
+	toUser = "20"
 
-	req.Incoming = &incoming
-	req.Locked = &locked
-	req.Outcoming = &outcoming
-	req.Spendable = &spendable
+	req.Amount = &amount
+	req.ToPlatform = &toPlatform
+	req.ToUser = &toUser
 
-	entity.Incoming, _ = decimal.NewFromString(incoming)
-	entity.Locked, _ = decimal.NewFromString(locked)
-	entity.Outcoming, _ = decimal.NewFromString(outcoming)
-	entity.Spendable, _ = decimal.NewFromString(spendable)
+	entity.Amount, _ = decimal.NewFromString(amount)
+	entity.ToPlatform, _ = decimal.NewFromString(toPlatform)
+	entity.ToUser, _ = decimal.NewFromString(toUser)
 
 	info, err := AddFields(context.Background(), &req)
 	if assert.Nil(t, err) {
