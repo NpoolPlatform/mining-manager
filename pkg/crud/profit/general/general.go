@@ -16,13 +16,13 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/general"
 	"github.com/NpoolPlatform/mining-manager/pkg/db"
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
-	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/general"
+	general "github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"
 
 	"github.com/google/uuid"
 )
 
-func Create(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) {
-	var info *ent.General
+func Create(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, error) {
+	var info *ent.ProfitGeneral
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Create")
@@ -38,25 +38,21 @@ func Create(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) {
 	span = tracer.Trace(span, in)
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		c := cli.General.Create()
+		c := cli.ProfitGeneral.Create()
 
 		if in.ID != nil {
 			c.SetID(uuid.MustParse(in.GetID()))
 		}
-		if in.AppID != nil {
-			c.SetAppID(uuid.MustParse(in.GetAppID()))
-		}
-		if in.UserID != nil {
-			c.SetUserID(uuid.MustParse(in.GetUserID()))
+		if in.GoodID != nil {
+			c.SetGoodID(uuid.MustParse(in.GetGoodID()))
 		}
 		if in.CoinTypeID != nil {
 			c.SetCoinTypeID(uuid.MustParse(in.GetCoinTypeID()))
 		}
 
-		c.SetIncoming(decimal.NewFromInt(0))
-		c.SetLocked(decimal.NewFromInt(0))
-		c.SetOutcoming(decimal.NewFromInt(0))
-		c.SetSpendable(decimal.NewFromInt(0))
+		c.SetAmount(decimal.NewFromInt(0))
+		c.SetToPlatform(decimal.NewFromInt(0))
+		c.SetToUser(decimal.NewFromInt(0))
 
 		info, err = c.Save(_ctx)
 		return err
@@ -68,7 +64,7 @@ func Create(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) {
 	return info, nil
 }
 
-func CreateBulk(ctx context.Context, in []*npool.GeneralReq) ([]*ent.General, error) {
+func CreateBulk(ctx context.Context, in []*npool.GeneralReq) ([]*ent.ProfitGeneral, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateBulk")
@@ -83,29 +79,25 @@ func CreateBulk(ctx context.Context, in []*npool.GeneralReq) ([]*ent.General, er
 
 	span = tracer.TraceMany(span, in)
 
-	rows := []*ent.General{}
+	rows := []*ent.ProfitGeneral{}
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		bulk := make([]*ent.GeneralCreate, len(in))
+		bulk := make([]*ent.ProfitGeneralCreate, len(in))
 		for i, info := range in {
-			bulk[i] = tx.General.Create()
+			bulk[i] = tx.ProfitGeneral.Create()
 			if info.ID != nil {
 				bulk[i].SetID(uuid.MustParse(info.GetID()))
 			}
-			if info.AppID != nil {
-				bulk[i].SetAppID(uuid.MustParse(info.GetAppID()))
-			}
-			if info.UserID != nil {
-				bulk[i].SetUserID(uuid.MustParse(info.GetUserID()))
+			if info.GoodID != nil {
+				bulk[i].SetGoodID(uuid.MustParse(info.GetGoodID()))
 			}
 			if info.CoinTypeID != nil {
 				bulk[i].SetCoinTypeID(uuid.MustParse(info.GetCoinTypeID()))
 			}
-			bulk[i].SetIncoming(decimal.NewFromInt(0))
-			bulk[i].SetLocked(decimal.NewFromInt(0))
-			bulk[i].SetOutcoming(decimal.NewFromInt(0))
-			bulk[i].SetSpendable(decimal.NewFromInt(0))
+			bulk[i].SetAmount(decimal.NewFromInt(0))
+			bulk[i].SetToPlatform(decimal.NewFromInt(0))
+			bulk[i].SetToUser(decimal.NewFromInt(0))
 		}
-		rows, err = tx.General.CreateBulk(bulk...).Save(_ctx)
+		rows, err = tx.ProfitGeneral.CreateBulk(bulk...).Save(_ctx)
 		return err
 	})
 	if err != nil {
@@ -114,8 +106,8 @@ func CreateBulk(ctx context.Context, in []*npool.GeneralReq) ([]*ent.General, er
 	return rows, nil
 }
 
-func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) { //nolint
-	var info *ent.General
+func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, error) { //nolint
+	var info *ent.ProfitGeneral
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Create")
@@ -131,85 +123,56 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) 
 	span = tracer.Trace(span, in)
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		info, err = tx.General.Query().Where(general.ID(uuid.MustParse(in.GetID()))).ForUpdate().Only(_ctx)
+		info, err = tx.ProfitGeneral.Query().Where(general.ID(uuid.MustParse(in.GetID()))).ForUpdate().Only(_ctx)
 		if err != nil {
 			return fmt.Errorf("fail query general: %v", err)
 		}
 
-		incoming := decimal.NewFromInt(0)
-		if in.Incoming != nil {
-			amount, err := decimal.NewFromString(in.GetIncoming())
+		amount := decimal.NewFromInt(0)
+		if in.Amount != nil {
+			amount, err = decimal.NewFromString(in.GetAmount())
 			if err != nil {
 				return err
 			}
-			incoming = incoming.Add(amount)
 		}
-		locked := decimal.NewFromInt(0)
-		if in.Locked != nil {
-			amount, err := decimal.NewFromString(in.GetLocked())
+		toPlatform := decimal.NewFromInt(0)
+		if in.ToPlatform != nil {
+			toPlatform, err = decimal.NewFromString(in.GetToPlatform())
 			if err != nil {
 				return err
 			}
-			locked = locked.Add(amount)
 		}
-		outcoming := decimal.NewFromInt(0)
-		if in.Outcoming != nil {
-			amount, err := decimal.NewFromString(in.GetOutcoming())
+		toUser := decimal.NewFromInt(0)
+		if in.ToUser != nil {
+			toUser, err = decimal.NewFromString(in.GetToUser())
 			if err != nil {
 				return err
 			}
-			outcoming = outcoming.Add(amount)
-		}
-		spendable := decimal.NewFromInt(0)
-		if in.Spendable != nil {
-			amount, err := decimal.NewFromString(in.GetSpendable())
-			if err != nil {
-				return err
-			}
-			spendable = spendable.Add(amount)
 		}
 
-		if incoming.Add(info.Incoming).
-			Cmp(
-				locked.Add(info.Locked).
-					Add(outcoming).
-					Add(info.Outcoming).
-					Add(spendable).
-					Add(info.Spendable),
-			) < 0 {
-			return fmt.Errorf("outcoming (%v + %v) + locked (%v + %v) + spendable (%v + %v) > incoming (%v + %v)",
-				outcoming, info.Outcoming, locked, info.Locked, spendable, info.Spendable, incoming, info.Incoming)
+		if amount.Cmp(toPlatform.Add(toUser)) < 0 {
+			return fmt.Errorf("amount < toPlatform + toUser")
 		}
-
-		if locked.Add(info.Locked).Cmp(decimal.NewFromInt(0)) < 0 {
-			return fmt.Errorf("locked + locked < 0")
+		if amount.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("amount < 0")
 		}
-
-		if incoming.Cmp(decimal.NewFromInt(0)) < 0 {
-			return fmt.Errorf("incoming < 0")
+		if toPlatform.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("toPlatform < 0")
 		}
-
-		if outcoming.Cmp(decimal.NewFromInt(0)) < 0 {
-			return fmt.Errorf("outcoming < 0")
-		}
-
-		if spendable.Add(info.Spendable).Cmp(decimal.NewFromInt(0)) < 0 {
-			return fmt.Errorf("spendable + spendable < 0")
+		if toUser.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("toPlatform < 0")
 		}
 
 		stm := info.Update()
 
-		if in.Incoming != nil {
-			stm = stm.AddIncoming(incoming)
+		if in.Amount != nil {
+			stm = stm.AddAmount(amount)
 		}
-		if in.Outcoming != nil {
-			stm = stm.AddOutcoming(outcoming)
+		if in.ToUser != nil {
+			stm = stm.AddToUser(toUser)
 		}
-		if in.Locked != nil {
-			stm = stm.AddLocked(locked)
-		}
-		if in.Spendable != nil {
-			stm = stm.AddSpendable(spendable)
+		if in.ToPlatform != nil {
+			stm = stm.AddToPlatform(toPlatform)
 		}
 
 		info, err = stm.Save(_ctx)
@@ -226,8 +189,8 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.General, error) 
 	return info, nil
 }
 
-func Row(ctx context.Context, id uuid.UUID) (*ent.General, error) {
-	var info *ent.General
+func Row(ctx context.Context, id uuid.UUID) (*ent.ProfitGeneral, error) {
+	var info *ent.ProfitGeneral
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Row")
@@ -243,7 +206,7 @@ func Row(ctx context.Context, id uuid.UUID) (*ent.General, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		info, err = cli.General.Query().Where(general.ID(id)).Only(_ctx)
+		info, err = cli.ProfitGeneral.Query().Where(general.ID(id)).Only(_ctx)
 		return err
 	})
 	if err != nil {
@@ -253,8 +216,8 @@ func Row(ctx context.Context, id uuid.UUID) (*ent.General, error) {
 	return info, nil
 }
 
-func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.GeneralQuery, error) { //nolint
-	stm := cli.General.Query()
+func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.ProfitGeneralQuery, error) { //nolint
+	stm := cli.ProfitGeneral.Query()
 	if conds.ID != nil {
 		switch conds.GetID().GetOp() {
 		case cruder.EQ:
@@ -263,18 +226,10 @@ func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.GeneralQuery, erro
 			return nil, fmt.Errorf("invalid general field")
 		}
 	}
-	if conds.AppID != nil {
-		switch conds.GetAppID().GetOp() {
+	if conds.GoodID != nil {
+		switch conds.GetGoodID().GetOp() {
 		case cruder.EQ:
-			stm.Where(general.AppID(uuid.MustParse(conds.GetAppID().GetValue())))
-		default:
-			return nil, fmt.Errorf("invalid general field")
-		}
-	}
-	if conds.UserID != nil {
-		switch conds.GetUserID().GetOp() {
-		case cruder.EQ:
-			stm.Where(general.UserID(uuid.MustParse(conds.GetUserID().GetValue())))
+			stm.Where(general.GoodID(uuid.MustParse(conds.GetGoodID().GetValue())))
 		default:
 			return nil, fmt.Errorf("invalid general field")
 		}
@@ -287,66 +242,50 @@ func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.GeneralQuery, erro
 			return nil, fmt.Errorf("invalid general field")
 		}
 	}
-	if conds.Incoming != nil {
-		incoming, err := decimal.NewFromString(conds.GetIncoming().GetValue())
+	if conds.Amount != nil {
+		amount, err := decimal.NewFromString(conds.GetAmount().GetValue())
 		if err != nil {
 			return nil, err
 		}
-		switch conds.GetIncoming().GetOp() {
+		switch conds.GetAmount().GetOp() {
 		case cruder.LT:
-			stm.Where(general.IncomingLT(incoming))
+			stm.Where(general.AmountLT(amount))
 		case cruder.GT:
-			stm.Where(general.IncomingGT(incoming))
+			stm.Where(general.AmountGT(amount))
 		case cruder.EQ:
-			stm.Where(general.IncomingEQ(incoming))
+			stm.Where(general.AmountEQ(amount))
 		default:
 			return nil, fmt.Errorf("invalid general field")
 		}
 	}
-	if conds.Locked != nil {
-		locked, err := decimal.NewFromString(conds.GetLocked().GetValue())
+	if conds.ToPlatform != nil {
+		toPlatform, err := decimal.NewFromString(conds.GetToPlatform().GetValue())
 		if err != nil {
 			return nil, err
 		}
-		switch conds.GetLocked().GetOp() {
+		switch conds.GetToPlatform().GetOp() {
 		case cruder.LT:
-			stm.Where(general.LockedLT(locked))
+			stm.Where(general.ToPlatformLT(toPlatform))
 		case cruder.GT:
-			stm.Where(general.LockedGT(locked))
+			stm.Where(general.ToPlatformGT(toPlatform))
 		case cruder.EQ:
-			stm.Where(general.LockedEQ(locked))
+			stm.Where(general.ToPlatformEQ(toPlatform))
 		default:
 			return nil, fmt.Errorf("invalid general field")
 		}
 	}
-	if conds.Outcoming != nil {
-		outcoming, err := decimal.NewFromString(conds.GetOutcoming().GetValue())
+	if conds.ToUser != nil {
+		toUser, err := decimal.NewFromString(conds.GetToUser().GetValue())
 		if err != nil {
 			return nil, err
 		}
-		switch conds.GetOutcoming().GetOp() {
+		switch conds.GetToUser().GetOp() {
 		case cruder.LT:
-			stm.Where(general.OutcomingLT(outcoming))
+			stm.Where(general.ToUserLT(toUser))
 		case cruder.GT:
-			stm.Where(general.OutcomingGT(outcoming))
+			stm.Where(general.ToUserGT(toUser))
 		case cruder.EQ:
-			stm.Where(general.OutcomingEQ(outcoming))
-		default:
-			return nil, fmt.Errorf("invalid general field")
-		}
-	}
-	if conds.Spendable != nil {
-		spendable, err := decimal.NewFromString(conds.GetSpendable().GetValue())
-		if err != nil {
-			return nil, err
-		}
-		switch conds.GetSpendable().GetOp() {
-		case cruder.LT:
-			stm.Where(general.SpendableLT(spendable))
-		case cruder.GT:
-			stm.Where(general.SpendableGT(spendable))
-		case cruder.EQ:
-			stm.Where(general.SpendableEQ(spendable))
+			stm.Where(general.ToUserEQ(toUser))
 		default:
 			return nil, fmt.Errorf("invalid general field")
 		}
@@ -354,7 +293,7 @@ func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.GeneralQuery, erro
 	return stm, nil
 }
 
-func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.General, int, error) {
+func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.ProfitGeneral, int, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Rows")
@@ -370,7 +309,7 @@ func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.Ge
 	span = tracer.TraceConds(span, conds)
 	span = commontracer.TraceOffsetLimit(span, offset, limit)
 
-	rows := []*ent.General{}
+	rows := []*ent.ProfitGeneral{}
 	var total int
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		stm, err := setQueryConds(conds, cli)
@@ -400,8 +339,8 @@ func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.Ge
 	return rows, total, nil
 }
 
-func RowOnly(ctx context.Context, conds *npool.Conds) (*ent.General, error) {
-	var info *ent.General
+func RowOnly(ctx context.Context, conds *npool.Conds) (*ent.ProfitGeneral, error) {
+	var info *ent.ProfitGeneral
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "RowOnly")
@@ -488,7 +427,7 @@ func Exist(ctx context.Context, id uuid.UUID) (bool, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		exist, err = cli.General.Query().Where(general.ID(id)).Exist(_ctx)
+		exist, err = cli.ProfitGeneral.Query().Where(general.ID(id)).Exist(_ctx)
 		return err
 	})
 	if err != nil {
@@ -534,8 +473,8 @@ func ExistConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 	return exist, nil
 }
 
-func Delete(ctx context.Context, id uuid.UUID) (*ent.General, error) {
-	var info *ent.General
+func Delete(ctx context.Context, id uuid.UUID) (*ent.ProfitGeneral, error) {
+	var info *ent.ProfitGeneral
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Delete")
@@ -551,7 +490,7 @@ func Delete(ctx context.Context, id uuid.UUID) (*ent.General, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		info, err = cli.General.UpdateOneID(id).
+		info, err = cli.ProfitGeneral.UpdateOneID(id).
 			SetDeletedAt(uint32(time.Now().Unix())).
 			Save(_ctx)
 		return err

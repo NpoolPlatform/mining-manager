@@ -1,5 +1,5 @@
 //nolint:nolintlint,dupl
-package detail
+package unsold
 
 import (
 	"context"

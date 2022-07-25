@@ -1,4 +1,4 @@
-package detail
+package unsold
 
 import (
 	"github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
@@ -8,11 +8,11 @@ import (
 )
 
 type Server struct {
-	detail.UnimplementedTemplateDetailServer
+	detail.UnimplementedProfitDetailServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	detail.RegisterTemplateDetailServer(server, &Server{})
+	detail.RegisterProfitDetailServer(server, &Server{})
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {

@@ -1,4 +1,4 @@
-package detail
+package unsold
 
 import (
 	"context"
@@ -7,22 +7,22 @@ import (
 
 	constant "github.com/NpoolPlatform/mining-manager/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/mining-manager/pkg/tracer"
-	tracer "github.com/NpoolPlatform/mining-manager/pkg/tracer/profit/detail"
+	tracer "github.com/NpoolPlatform/mining-manager/pkg/tracer/profit/unsold"
 	"github.com/shopspring/decimal"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
+	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/unsold"
 	"github.com/NpoolPlatform/mining-manager/pkg/db"
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
-	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/detail"
+	unsold "github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitunsold"
 
 	"github.com/google/uuid"
 )
 
-func Create(ctx context.Context, in *npool.DetailReq) (*ent.Detail, error) { //nolint
-	var info *ent.Detail
+func Create(ctx context.Context, in *npool.UnsoldReq) (*ent.Unsold, error) { //nolint
+	var info *ent.Unsold
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Create")
@@ -38,7 +38,7 @@ func Create(ctx context.Context, in *npool.DetailReq) (*ent.Detail, error) { //n
 	span = tracer.Trace(span, in)
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		c := cli.Debug().Detail.Create()
+		c := cli.Debug().Unsold.Create()
 
 		if in.ID != nil {
 			c.SetID(uuid.MustParse(in.GetID()))
@@ -95,7 +95,7 @@ func Create(ctx context.Context, in *npool.DetailReq) (*ent.Detail, error) { //n
 	return info, nil
 }
 
-func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.Detail, error) { //nolint
+func CreateBulk(ctx context.Context, in []*npool.UnsoldReq) ([]*ent.Unsold, error) { //nolint
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateBulk")
@@ -110,11 +110,11 @@ func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.Detail, erro
 
 	span = tracer.TraceMany(span, in)
 
-	rows := []*ent.Detail{}
+	rows := []*ent.Unsold{}
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		bulk := make([]*ent.DetailCreate, len(in))
+		bulk := make([]*ent.UnsoldCreate, len(in))
 		for i, info := range in {
-			bulk[i] = tx.Detail.Create()
+			bulk[i] = tx.Unsold.Create()
 			if info.ID != nil {
 				bulk[i].SetID(uuid.MustParse(info.GetID()))
 			}
@@ -160,7 +160,7 @@ func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.Detail, erro
 				bulk[i].SetCreatedAt(info.GetCreatedAt())
 			}
 		}
-		rows, err = tx.Detail.CreateBulk(bulk...).Save(_ctx)
+		rows, err = tx.Unsold.CreateBulk(bulk...).Save(_ctx)
 		return err
 	})
 	if err != nil {
@@ -169,8 +169,8 @@ func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.Detail, erro
 	return rows, nil
 }
 
-func Row(ctx context.Context, id uuid.UUID) (*ent.Detail, error) {
-	var info *ent.Detail
+func Row(ctx context.Context, id uuid.UUID) (*ent.Unsold, error) {
+	var info *ent.Unsold
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Row")
@@ -186,7 +186,7 @@ func Row(ctx context.Context, id uuid.UUID) (*ent.Detail, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		info, err = cli.Detail.Query().Where(detail.ID(id)).Only(_ctx)
+		info, err = cli.Unsold.Query().Where(unsold.ID(id)).Only(_ctx)
 		return err
 	})
 	if err != nil {
@@ -196,54 +196,54 @@ func Row(ctx context.Context, id uuid.UUID) (*ent.Detail, error) {
 	return info, nil
 }
 
-func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.DetailQuery, error) { //nolint
-	stm := cli.Detail.Query()
+func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.UnsoldQuery, error) { //nolint
+	stm := cli.Unsold.Query()
 	if conds.ID != nil {
 		switch conds.GetID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.ID(uuid.MustParse(conds.GetID().GetValue())))
+			stm.Where(unsold.ID(uuid.MustParse(conds.GetID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.AppID != nil {
 		switch conds.GetAppID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.AppID(uuid.MustParse(conds.GetAppID().GetValue())))
+			stm.Where(unsold.AppID(uuid.MustParse(conds.GetAppID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.UserID != nil {
 		switch conds.GetUserID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.UserID(uuid.MustParse(conds.GetUserID().GetValue())))
+			stm.Where(unsold.UserID(uuid.MustParse(conds.GetUserID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.CoinTypeID != nil {
 		switch conds.GetCoinTypeID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.CoinTypeID(uuid.MustParse(conds.GetCoinTypeID().GetValue())))
+			stm.Where(unsold.CoinTypeID(uuid.MustParse(conds.GetCoinTypeID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.IOType != nil {
 		switch conds.GetIOType().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.IoType(npool.IOType(conds.GetIOType().GetValue()).String()))
+			stm.Where(unsold.IoType(npool.IOType(conds.GetIOType().GetValue()).String()))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.IOSubType != nil {
 		switch conds.GetIOSubType().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.IoType(npool.IOSubType(conds.GetIOSubType().GetValue()).String()))
+			stm.Where(unsold.IoType(npool.IOSubType(conds.GetIOSubType().GetValue()).String()))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.Amount != nil {
@@ -253,21 +253,21 @@ func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.DetailQuery, error
 		}
 		switch conds.GetAmount().GetOp() {
 		case cruder.LT:
-			stm.Where(detail.AmountLT(amount))
+			stm.Where(unsold.AmountLT(amount))
 		case cruder.GT:
-			stm.Where(detail.AmountGT(amount))
+			stm.Where(unsold.AmountGT(amount))
 		case cruder.EQ:
-			stm.Where(detail.AmountEQ(amount))
+			stm.Where(unsold.AmountEQ(amount))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.FromCoinTypeID != nil {
 		switch conds.GetFromCoinTypeID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.FromCoinTypeID(uuid.MustParse(conds.GetFromCoinTypeID().GetValue())))
+			stm.Where(unsold.FromCoinTypeID(uuid.MustParse(conds.GetFromCoinTypeID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.CoinUSDCurrency != nil {
@@ -277,35 +277,35 @@ func setQueryConds(conds *npool.Conds, cli *ent.Client) (*ent.DetailQuery, error
 		}
 		switch conds.GetCoinUSDCurrency().GetOp() {
 		case cruder.LT:
-			stm.Where(detail.CoinUsdCurrencyLT(currency))
+			stm.Where(unsold.CoinUsdCurrencyLT(currency))
 		case cruder.GT:
-			stm.Where(detail.CoinUsdCurrencyGT(currency))
+			stm.Where(unsold.CoinUsdCurrencyGT(currency))
 		case cruder.EQ:
-			stm.Where(detail.CoinUsdCurrencyEQ(currency))
+			stm.Where(unsold.CoinUsdCurrencyEQ(currency))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.IOExtra != nil {
 		switch conds.GetIOExtra().GetOp() {
 		case cruder.LIKE:
-			stm.Where(detail.IoExtraContains(conds.GetIOExtra().GetValue()))
+			stm.Where(unsold.IoExtraContains(conds.GetIOExtra().GetValue()))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	if conds.FromOldID != nil {
 		switch conds.GetFromOldID().GetOp() {
 		case cruder.EQ:
-			stm.Where(detail.FromOldID(uuid.MustParse(conds.GetFromOldID().GetValue())))
+			stm.Where(unsold.FromOldID(uuid.MustParse(conds.GetFromOldID().GetValue())))
 		default:
-			return nil, fmt.Errorf("invalid detail field")
+			return nil, fmt.Errorf("invalid unsold field")
 		}
 	}
 	return stm, nil
 }
 
-func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.Detail, int, error) {
+func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.Unsold, int, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Rows")
@@ -321,7 +321,7 @@ func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.De
 	span = tracer.TraceConds(span, conds)
 	span = commontracer.TraceOffsetLimit(span, offset, limit)
 
-	rows := []*ent.Detail{}
+	rows := []*ent.Unsold{}
 	var total int
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		stm, err := setQueryConds(conds, cli)
@@ -336,7 +336,7 @@ func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.De
 
 		rows, err = stm.
 			Offset(offset).
-			Order(ent.Desc(detail.FieldUpdatedAt)).
+			Order(ent.Desc(unsold.FieldUpdatedAt)).
 			Limit(limit).
 			All(_ctx)
 		if err != nil {
@@ -351,8 +351,8 @@ func Rows(ctx context.Context, conds *npool.Conds, offset, limit int) ([]*ent.De
 	return rows, total, nil
 }
 
-func RowOnly(ctx context.Context, conds *npool.Conds) (*ent.Detail, error) {
-	var info *ent.Detail
+func RowOnly(ctx context.Context, conds *npool.Conds) (*ent.Unsold, error) {
+	var info *ent.Unsold
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "RowOnly")
@@ -439,7 +439,7 @@ func Exist(ctx context.Context, id uuid.UUID) (bool, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		exist, err = cli.Detail.Query().Where(detail.ID(id)).Exist(_ctx)
+		exist, err = cli.Unsold.Query().Where(unsold.ID(id)).Exist(_ctx)
 		return err
 	})
 	if err != nil {
@@ -485,8 +485,8 @@ func ExistConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 	return exist, nil
 }
 
-func Delete(ctx context.Context, id uuid.UUID) (*ent.Detail, error) {
-	var info *ent.Detail
+func Delete(ctx context.Context, id uuid.UUID) (*ent.Unsold, error) {
+	var info *ent.Unsold
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "Delete")
@@ -502,7 +502,7 @@ func Delete(ctx context.Context, id uuid.UUID) (*ent.Detail, error) {
 	span = commontracer.TraceID(span, id.String())
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		info, err = cli.Detail.UpdateOneID(id).
+		info, err = cli.Unsold.UpdateOneID(id).
 			SetDeletedAt(uint32(time.Now().Unix())).
 			Save(_ctx)
 		return err

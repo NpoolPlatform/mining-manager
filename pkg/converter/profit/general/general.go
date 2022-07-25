@@ -5,20 +5,18 @@ import (
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 )
 
-func Ent2Grpc(row *ent.General) *npool.General {
+func Ent2Grpc(row *ent.ProfitGeneral) *npool.General {
 	return &npool.General{
 		ID:         row.ID.String(),
-		AppID:      row.AppID.String(),
-		UserID:     row.UserID.String(),
+		GoodID:     row.GoodID.String(),
 		CoinTypeID: row.CoinTypeID.String(),
-		Incoming:   row.Incoming.String(),
-		Locked:     row.Locked.String(),
-		Outcoming:  row.Outcoming.String(),
-		Spendable:  row.Spendable.String(),
+		Amount:     row.Amount.String(),
+		ToPlatform: row.ToPlatform.String(),
+		ToUser:     row.ToUser.String(),
 	}
 }
 
-func Ent2GrpcMany(rows []*ent.General) []*npool.General {
+func Ent2GrpcMany(rows []*ent.ProfitGeneral) []*npool.General {
 	infos := []*npool.General{}
 	for _, row := range rows {
 		infos = append(infos, Ent2Grpc(row))
