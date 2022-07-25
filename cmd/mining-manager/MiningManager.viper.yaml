@@ -1,10 +1,10 @@
 ---
 config:
   hostname: "mining-manager.npool.top"
-  http_port: 50330
-  grpc_port: 50331
-  healthz_port: 50332
-  prometheus_port: 50333
+  http_port: 50350
+  grpc_port: 50351
+  healthz_port: 50352
+  prometheus_port: 50353
   appid: "89089012783789789719823798127398"
   serviceid: "f2bf98fa-0c14-11ed-b596-72e9de4b20f6"
   logdir: "./"

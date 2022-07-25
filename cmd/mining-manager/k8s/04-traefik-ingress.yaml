@@ -24,7 +24,7 @@ spec:
           - path: /api/mining
             backend:
               serviceName: mining-manager
-              servicePort: 50330
+              servicePort: 50350
     - host: api.procyon.vip
       http: *http_rules
     - host: api.xpool.top
