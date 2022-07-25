@@ -62,10 +62,12 @@ func duplicate(infos []*npool.DetailReq) error {
 			return status.Error(codes.InvalidArgument, fmt.Sprintf("Infos has invalid element %v", err))
 		}
 
-		key := fmt.Sprintf("%v:%v", info.GoodID, info.CoinTypeID)
+		key := fmt.Sprintf("%v:%v", info.GetGoodID(), info.GetCoinTypeID())
 		if _, ok := keys[key]; ok {
 			return status.Error(codes.InvalidArgument, "Infos has duplicate GoodID:CoinTypeID")
 		}
+
+		keys[key] = struct{}{}
 	}
 
 	return nil

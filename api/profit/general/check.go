@@ -24,12 +24,12 @@ func validate(info *npool.GeneralReq) error {
 	}
 
 	if info.CoinTypeID == nil {
-		logger.Sugar().Error("CoinTypeID is empty")
+		logger.Sugar().Errorw("validate", "CoinTypeID", info.CoinTypeID)
 		return status.Error(codes.InvalidArgument, "UserID is empty")
 	}
 
 	if _, err := uuid.Parse(info.GetCoinTypeID()); err != nil {
-		logger.Sugar().Error("CoinTypeID is invalid: %v", err)
+		logger.Sugar().Errorw("validate", "CoinTypeID", info.CoinTypeID, "error", err)
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("CoinTypeID is invalid: %v", err))
 	}
 
@@ -44,10 +44,12 @@ func duplicate(infos []*npool.GeneralReq) error {
 			return status.Error(codes.InvalidArgument, fmt.Sprintf("Infos has invalid element %v", err))
 		}
 
-		key := fmt.Sprintf("%v:%v", info.GoodID, info.CoinTypeID)
+		key := fmt.Sprintf("%v:%v", info.GetGoodID(), info.GetCoinTypeID())
 		if _, ok := keys[key]; ok {
 			return status.Error(codes.InvalidArgument, "Infos has duplicate GoodID:CoinTypeID")
 		}
+
+		keys[key] = struct{}{}
 	}
 
 	return nil

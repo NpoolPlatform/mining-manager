@@ -55,16 +55,9 @@ func validate(info *npool.DetailReq) error { //nolint
 }
 
 func duplicate(infos []*npool.DetailReq) error {
-	keys := map[string]struct{}{}
-
 	for _, info := range infos {
 		if err := validate(info); err != nil {
 			return status.Error(codes.InvalidArgument, fmt.Sprintf("Infos has invalid element %v", err))
-		}
-
-		key := fmt.Sprintf("%v:%v", info.GoodID, info.CoinTypeID)
-		if _, ok := keys[key]; ok {
-			return status.Error(codes.InvalidArgument, "Infos has duplicate GoodID:CoinTypeID")
 		}
 	}
 
