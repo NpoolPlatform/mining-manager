@@ -29,7 +29,7 @@ func init() {
 	}
 }
 
-var entity = ent.General{
+var entity = ent.ProfitGeneral{
 	ID:         uuid.New(),
 	GoodID:     uuid.New(),
 	CoinTypeID: uuid.New(),
@@ -56,7 +56,7 @@ var (
 	}
 )
 
-var info *ent.General
+var info *ent.ProfitGeneral
 
 func create(t *testing.T) {
 	var err error
@@ -69,7 +69,7 @@ func create(t *testing.T) {
 }
 
 func createBulk(t *testing.T) {
-	entities := []*ent.General{
+	entities := []*ent.ProfitGeneral{
 		{
 			ID:         uuid.New(),
 			GoodID:     uuid.New(),
@@ -92,20 +92,18 @@ func createBulk(t *testing.T) {
 	for _, _entity := range entities {
 		_id := _entity.ID.String()
 		_goodID := _entity.GoodID.String()
-		_userID := _entity.UserID.String()
 		_coinTypeID := _entity.CoinTypeID.String()
-		_incoming := _entity.Incoming.String()
-		_locked := _entity.Locked.String()
-		_outcoming := _entity.Outcoming.String()
-		_spendable := _entity.Spendable.String()
+		_amount := _entity.Amount.String()
+		_toPlatform := _entity.ToPlatform.String()
+		_toUser := _entity.ToUser.String()
 
 		reqs = append(reqs, &npool.GeneralReq{
 			ID:         &_id,
 			GoodID:     &_goodID,
 			CoinTypeID: &_coinTypeID,
-			Amount:     &_incoming,
-			ToPlatform: &_locked,
-			ToUser:     &_outcoming,
+			Amount:     &_amount,
+			ToPlatform: &_toPlatform,
+			ToUser:     &_toUser,
 		})
 	}
 	infos, err := CreateBulk(context.Background(), reqs)

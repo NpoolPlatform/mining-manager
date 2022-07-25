@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 	"github.com/shopspring/decimal"
@@ -29,7 +30,7 @@ func init() {
 	}
 }
 
-var entity = ent.Detail{
+var entity = ent.ProfitDetail{
 	ID:          uuid.New(),
 	GoodID:      uuid.New(),
 	CoinTypeID:  uuid.New(),
@@ -53,7 +54,7 @@ var (
 	}
 )
 
-var info *ent.Detail
+var info *ent.ProfitDetail
 
 func create(t *testing.T) {
 	var err error
@@ -66,7 +67,7 @@ func create(t *testing.T) {
 }
 
 func createBulk(t *testing.T) {
-	entities := []*ent.Detail{
+	entities := []*ent.ProfitDetail{
 		{
 			ID:          uuid.New(),
 			GoodID:      uuid.New(),

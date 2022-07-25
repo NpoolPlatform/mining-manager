@@ -21,7 +21,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Create(ctx context.Context, in *npool.DetailReq) (*ent.ProfitDetail, error) { //nolint
+func Create(ctx context.Context, in *npool.DetailReq) (*ent.ProfitDetail, error) {
 	var info *ent.ProfitDetail
 	var err error
 
@@ -73,7 +73,7 @@ func Create(ctx context.Context, in *npool.DetailReq) (*ent.ProfitDetail, error)
 	return info, nil
 }
 
-func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.ProfitDetail, error) { //nolint
+func CreateBulk(ctx context.Context, in []*npool.DetailReq) ([]*ent.ProfitDetail, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateBulk")
