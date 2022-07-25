@@ -6,31 +6,44 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/NpoolPlatform/service-template/pkg/db/ent"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 )
 
-// The DetailFunc type is an adapter to allow the use of ordinary
-// function as Detail mutator.
-type DetailFunc func(context.Context, *ent.DetailMutation) (ent.Value, error)
+// The ProfitDetailFunc type is an adapter to allow the use of ordinary
+// function as ProfitDetail mutator.
+type ProfitDetailFunc func(context.Context, *ent.ProfitDetailMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f DetailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.DetailMutation)
+func (f ProfitDetailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ProfitDetailMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DetailMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfitDetailMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The GeneralFunc type is an adapter to allow the use of ordinary
-// function as General mutator.
-type GeneralFunc func(context.Context, *ent.GeneralMutation) (ent.Value, error)
+// The ProfitGeneralFunc type is an adapter to allow the use of ordinary
+// function as ProfitGeneral mutator.
+type ProfitGeneralFunc func(context.Context, *ent.ProfitGeneralMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f GeneralFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GeneralMutation)
+func (f ProfitGeneralFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ProfitGeneralMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GeneralMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfitGeneralMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ProfitUnsoldFunc type is an adapter to allow the use of ordinary
+// function as ProfitUnsold mutator.
+type ProfitUnsoldFunc func(context.Context, *ent.ProfitUnsoldMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProfitUnsoldFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ProfitUnsoldMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfitUnsoldMutation", m)
 	}
 	return f(ctx, mv)
 }

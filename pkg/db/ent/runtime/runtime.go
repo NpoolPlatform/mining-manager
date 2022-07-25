@@ -5,9 +5,10 @@ package runtime
 import (
 	"context"
 
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/detail"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/general"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/schema"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitdetail"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitunsold"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/schema"
 	"github.com/google/uuid"
 
 	"entgo.io/ent"
@@ -18,114 +19,134 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	detailMixin := schema.Detail{}.Mixin()
-	detail.Policy = privacy.NewPolicies(detailMixin[0], schema.Detail{})
-	detail.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	profitdetailMixin := schema.ProfitDetail{}.Mixin()
+	profitdetail.Policy = privacy.NewPolicies(profitdetailMixin[0], schema.ProfitDetail{})
+	profitdetail.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := detail.Policy.EvalMutation(ctx, m); err != nil {
+			if err := profitdetail.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	detailMixinFields0 := detailMixin[0].Fields()
-	_ = detailMixinFields0
-	detailFields := schema.Detail{}.Fields()
-	_ = detailFields
-	// detailDescCreatedAt is the schema descriptor for created_at field.
-	detailDescCreatedAt := detailMixinFields0[0].Descriptor()
-	// detail.DefaultCreatedAt holds the default value on creation for the created_at field.
-	detail.DefaultCreatedAt = detailDescCreatedAt.Default.(func() uint32)
-	// detailDescUpdatedAt is the schema descriptor for updated_at field.
-	detailDescUpdatedAt := detailMixinFields0[1].Descriptor()
-	// detail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	detail.DefaultUpdatedAt = detailDescUpdatedAt.Default.(func() uint32)
-	// detail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	detail.UpdateDefaultUpdatedAt = detailDescUpdatedAt.UpdateDefault.(func() uint32)
-	// detailDescDeletedAt is the schema descriptor for deleted_at field.
-	detailDescDeletedAt := detailMixinFields0[2].Descriptor()
-	// detail.DefaultDeletedAt holds the default value on creation for the deleted_at field.
-	detail.DefaultDeletedAt = detailDescDeletedAt.Default.(func() uint32)
-	// detailDescAppID is the schema descriptor for app_id field.
-	detailDescAppID := detailFields[1].Descriptor()
-	// detail.DefaultAppID holds the default value on creation for the app_id field.
-	detail.DefaultAppID = detailDescAppID.Default.(func() uuid.UUID)
-	// detailDescUserID is the schema descriptor for user_id field.
-	detailDescUserID := detailFields[2].Descriptor()
-	// detail.DefaultUserID holds the default value on creation for the user_id field.
-	detail.DefaultUserID = detailDescUserID.Default.(func() uuid.UUID)
-	// detailDescCoinTypeID is the schema descriptor for coin_type_id field.
-	detailDescCoinTypeID := detailFields[3].Descriptor()
-	// detail.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
-	detail.DefaultCoinTypeID = detailDescCoinTypeID.Default.(func() uuid.UUID)
-	// detailDescIoType is the schema descriptor for io_type field.
-	detailDescIoType := detailFields[4].Descriptor()
-	// detail.DefaultIoType holds the default value on creation for the io_type field.
-	detail.DefaultIoType = detailDescIoType.Default.(string)
-	// detailDescIoSubType is the schema descriptor for io_sub_type field.
-	detailDescIoSubType := detailFields[5].Descriptor()
-	// detail.DefaultIoSubType holds the default value on creation for the io_sub_type field.
-	detail.DefaultIoSubType = detailDescIoSubType.Default.(string)
-	// detailDescFromCoinTypeID is the schema descriptor for from_coin_type_id field.
-	detailDescFromCoinTypeID := detailFields[7].Descriptor()
-	// detail.DefaultFromCoinTypeID holds the default value on creation for the from_coin_type_id field.
-	detail.DefaultFromCoinTypeID = detailDescFromCoinTypeID.Default.(func() uuid.UUID)
-	// detailDescIoExtra is the schema descriptor for io_extra field.
-	detailDescIoExtra := detailFields[9].Descriptor()
-	// detail.DefaultIoExtra holds the default value on creation for the io_extra field.
-	detail.DefaultIoExtra = detailDescIoExtra.Default.(string)
-	// detailDescFromOldID is the schema descriptor for from_old_id field.
-	detailDescFromOldID := detailFields[10].Descriptor()
-	// detail.DefaultFromOldID holds the default value on creation for the from_old_id field.
-	detail.DefaultFromOldID = detailDescFromOldID.Default.(func() uuid.UUID)
-	// detailDescID is the schema descriptor for id field.
-	detailDescID := detailFields[0].Descriptor()
-	// detail.DefaultID holds the default value on creation for the id field.
-	detail.DefaultID = detailDescID.Default.(func() uuid.UUID)
-	generalMixin := schema.General{}.Mixin()
-	general.Policy = privacy.NewPolicies(generalMixin[0], schema.General{})
-	general.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	profitdetailMixinFields0 := profitdetailMixin[0].Fields()
+	_ = profitdetailMixinFields0
+	profitdetailFields := schema.ProfitDetail{}.Fields()
+	_ = profitdetailFields
+	// profitdetailDescCreatedAt is the schema descriptor for created_at field.
+	profitdetailDescCreatedAt := profitdetailMixinFields0[0].Descriptor()
+	// profitdetail.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profitdetail.DefaultCreatedAt = profitdetailDescCreatedAt.Default.(func() uint32)
+	// profitdetailDescUpdatedAt is the schema descriptor for updated_at field.
+	profitdetailDescUpdatedAt := profitdetailMixinFields0[1].Descriptor()
+	// profitdetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profitdetail.DefaultUpdatedAt = profitdetailDescUpdatedAt.Default.(func() uint32)
+	// profitdetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profitdetail.UpdateDefaultUpdatedAt = profitdetailDescUpdatedAt.UpdateDefault.(func() uint32)
+	// profitdetailDescDeletedAt is the schema descriptor for deleted_at field.
+	profitdetailDescDeletedAt := profitdetailMixinFields0[2].Descriptor()
+	// profitdetail.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	profitdetail.DefaultDeletedAt = profitdetailDescDeletedAt.Default.(func() uint32)
+	// profitdetailDescGoodID is the schema descriptor for good_id field.
+	profitdetailDescGoodID := profitdetailFields[1].Descriptor()
+	// profitdetail.DefaultGoodID holds the default value on creation for the good_id field.
+	profitdetail.DefaultGoodID = profitdetailDescGoodID.Default.(func() uuid.UUID)
+	// profitdetailDescCoinTypeID is the schema descriptor for coin_type_id field.
+	profitdetailDescCoinTypeID := profitdetailFields[2].Descriptor()
+	// profitdetail.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
+	profitdetail.DefaultCoinTypeID = profitdetailDescCoinTypeID.Default.(func() uuid.UUID)
+	// profitdetailDescBenefitDate is the schema descriptor for benefit_date field.
+	profitdetailDescBenefitDate := profitdetailFields[4].Descriptor()
+	// profitdetail.DefaultBenefitDate holds the default value on creation for the benefit_date field.
+	profitdetail.DefaultBenefitDate = profitdetailDescBenefitDate.Default.(uint32)
+	// profitdetailDescID is the schema descriptor for id field.
+	profitdetailDescID := profitdetailFields[0].Descriptor()
+	// profitdetail.DefaultID holds the default value on creation for the id field.
+	profitdetail.DefaultID = profitdetailDescID.Default.(func() uuid.UUID)
+	profitgeneralMixin := schema.ProfitGeneral{}.Mixin()
+	profitgeneral.Policy = privacy.NewPolicies(profitgeneralMixin[0], schema.ProfitGeneral{})
+	profitgeneral.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := general.Policy.EvalMutation(ctx, m); err != nil {
+			if err := profitgeneral.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	generalMixinFields0 := generalMixin[0].Fields()
-	_ = generalMixinFields0
-	generalFields := schema.General{}.Fields()
-	_ = generalFields
-	// generalDescCreatedAt is the schema descriptor for created_at field.
-	generalDescCreatedAt := generalMixinFields0[0].Descriptor()
-	// general.DefaultCreatedAt holds the default value on creation for the created_at field.
-	general.DefaultCreatedAt = generalDescCreatedAt.Default.(func() uint32)
-	// generalDescUpdatedAt is the schema descriptor for updated_at field.
-	generalDescUpdatedAt := generalMixinFields0[1].Descriptor()
-	// general.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	general.DefaultUpdatedAt = generalDescUpdatedAt.Default.(func() uint32)
-	// general.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	general.UpdateDefaultUpdatedAt = generalDescUpdatedAt.UpdateDefault.(func() uint32)
-	// generalDescDeletedAt is the schema descriptor for deleted_at field.
-	generalDescDeletedAt := generalMixinFields0[2].Descriptor()
-	// general.DefaultDeletedAt holds the default value on creation for the deleted_at field.
-	general.DefaultDeletedAt = generalDescDeletedAt.Default.(func() uint32)
-	// generalDescAppID is the schema descriptor for app_id field.
-	generalDescAppID := generalFields[1].Descriptor()
-	// general.DefaultAppID holds the default value on creation for the app_id field.
-	general.DefaultAppID = generalDescAppID.Default.(func() uuid.UUID)
-	// generalDescUserID is the schema descriptor for user_id field.
-	generalDescUserID := generalFields[2].Descriptor()
-	// general.DefaultUserID holds the default value on creation for the user_id field.
-	general.DefaultUserID = generalDescUserID.Default.(func() uuid.UUID)
-	// generalDescCoinTypeID is the schema descriptor for coin_type_id field.
-	generalDescCoinTypeID := generalFields[3].Descriptor()
-	// general.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
-	general.DefaultCoinTypeID = generalDescCoinTypeID.Default.(func() uuid.UUID)
-	// generalDescID is the schema descriptor for id field.
-	generalDescID := generalFields[0].Descriptor()
-	// general.DefaultID holds the default value on creation for the id field.
-	general.DefaultID = generalDescID.Default.(func() uuid.UUID)
+	profitgeneralMixinFields0 := profitgeneralMixin[0].Fields()
+	_ = profitgeneralMixinFields0
+	profitgeneralFields := schema.ProfitGeneral{}.Fields()
+	_ = profitgeneralFields
+	// profitgeneralDescCreatedAt is the schema descriptor for created_at field.
+	profitgeneralDescCreatedAt := profitgeneralMixinFields0[0].Descriptor()
+	// profitgeneral.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profitgeneral.DefaultCreatedAt = profitgeneralDescCreatedAt.Default.(func() uint32)
+	// profitgeneralDescUpdatedAt is the schema descriptor for updated_at field.
+	profitgeneralDescUpdatedAt := profitgeneralMixinFields0[1].Descriptor()
+	// profitgeneral.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profitgeneral.DefaultUpdatedAt = profitgeneralDescUpdatedAt.Default.(func() uint32)
+	// profitgeneral.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profitgeneral.UpdateDefaultUpdatedAt = profitgeneralDescUpdatedAt.UpdateDefault.(func() uint32)
+	// profitgeneralDescDeletedAt is the schema descriptor for deleted_at field.
+	profitgeneralDescDeletedAt := profitgeneralMixinFields0[2].Descriptor()
+	// profitgeneral.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	profitgeneral.DefaultDeletedAt = profitgeneralDescDeletedAt.Default.(func() uint32)
+	// profitgeneralDescGoodID is the schema descriptor for good_id field.
+	profitgeneralDescGoodID := profitgeneralFields[1].Descriptor()
+	// profitgeneral.DefaultGoodID holds the default value on creation for the good_id field.
+	profitgeneral.DefaultGoodID = profitgeneralDescGoodID.Default.(func() uuid.UUID)
+	// profitgeneralDescCoinTypeID is the schema descriptor for coin_type_id field.
+	profitgeneralDescCoinTypeID := profitgeneralFields[2].Descriptor()
+	// profitgeneral.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
+	profitgeneral.DefaultCoinTypeID = profitgeneralDescCoinTypeID.Default.(func() uuid.UUID)
+	// profitgeneralDescID is the schema descriptor for id field.
+	profitgeneralDescID := profitgeneralFields[0].Descriptor()
+	// profitgeneral.DefaultID holds the default value on creation for the id field.
+	profitgeneral.DefaultID = profitgeneralDescID.Default.(func() uuid.UUID)
+	profitunsoldMixin := schema.ProfitUnsold{}.Mixin()
+	profitunsold.Policy = privacy.NewPolicies(profitunsoldMixin[0], schema.ProfitUnsold{})
+	profitunsold.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := profitunsold.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	profitunsoldMixinFields0 := profitunsoldMixin[0].Fields()
+	_ = profitunsoldMixinFields0
+	profitunsoldFields := schema.ProfitUnsold{}.Fields()
+	_ = profitunsoldFields
+	// profitunsoldDescCreatedAt is the schema descriptor for created_at field.
+	profitunsoldDescCreatedAt := profitunsoldMixinFields0[0].Descriptor()
+	// profitunsold.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profitunsold.DefaultCreatedAt = profitunsoldDescCreatedAt.Default.(func() uint32)
+	// profitunsoldDescUpdatedAt is the schema descriptor for updated_at field.
+	profitunsoldDescUpdatedAt := profitunsoldMixinFields0[1].Descriptor()
+	// profitunsold.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profitunsold.DefaultUpdatedAt = profitunsoldDescUpdatedAt.Default.(func() uint32)
+	// profitunsold.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profitunsold.UpdateDefaultUpdatedAt = profitunsoldDescUpdatedAt.UpdateDefault.(func() uint32)
+	// profitunsoldDescDeletedAt is the schema descriptor for deleted_at field.
+	profitunsoldDescDeletedAt := profitunsoldMixinFields0[2].Descriptor()
+	// profitunsold.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	profitunsold.DefaultDeletedAt = profitunsoldDescDeletedAt.Default.(func() uint32)
+	// profitunsoldDescGoodID is the schema descriptor for good_id field.
+	profitunsoldDescGoodID := profitunsoldFields[1].Descriptor()
+	// profitunsold.DefaultGoodID holds the default value on creation for the good_id field.
+	profitunsold.DefaultGoodID = profitunsoldDescGoodID.Default.(func() uuid.UUID)
+	// profitunsoldDescCoinTypeID is the schema descriptor for coin_type_id field.
+	profitunsoldDescCoinTypeID := profitunsoldFields[2].Descriptor()
+	// profitunsold.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
+	profitunsold.DefaultCoinTypeID = profitunsoldDescCoinTypeID.Default.(func() uuid.UUID)
+	// profitunsoldDescBenefitDate is the schema descriptor for benefit_date field.
+	profitunsoldDescBenefitDate := profitunsoldFields[4].Descriptor()
+	// profitunsold.DefaultBenefitDate holds the default value on creation for the benefit_date field.
+	profitunsold.DefaultBenefitDate = profitunsoldDescBenefitDate.Default.(uint32)
+	// profitunsoldDescID is the schema descriptor for id field.
+	profitunsoldDescID := profitunsoldFields[0].Descriptor()
+	// profitunsold.DefaultID holds the default value on creation for the id field.
+	profitunsold.DefaultID = profitunsoldDescID.Default.(func() uuid.UUID)
 }
 
 const (

@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/detail"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/general"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/predicate"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/predicate"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitdetail"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitunsold"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 
@@ -26,51 +27,46 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDetail  = "Detail"
-	TypeGeneral = "General"
+	TypeProfitDetail  = "ProfitDetail"
+	TypeProfitGeneral = "ProfitGeneral"
+	TypeProfitUnsold  = "ProfitUnsold"
 )
 
-// DetailMutation represents an operation that mutates the Detail nodes in the graph.
-type DetailMutation struct {
+// ProfitDetailMutation represents an operation that mutates the ProfitDetail nodes in the graph.
+type ProfitDetailMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *uuid.UUID
-	created_at           *uint32
-	addcreated_at        *int32
-	updated_at           *uint32
-	addupdated_at        *int32
-	deleted_at           *uint32
-	adddeleted_at        *int32
-	app_id               *uuid.UUID
-	user_id              *uuid.UUID
-	coin_type_id         *uuid.UUID
-	io_type              *string
-	io_sub_type          *string
-	amount               *decimal.Decimal
-	addamount            *decimal.Decimal
-	from_coin_type_id    *uuid.UUID
-	coin_usd_currency    *decimal.Decimal
-	addcoin_usd_currency *decimal.Decimal
-	io_extra             *string
-	from_old_id          *uuid.UUID
-	clearedFields        map[string]struct{}
-	done                 bool
-	oldValue             func(context.Context) (*Detail, error)
-	predicates           []predicate.Detail
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *uint32
+	addcreated_at   *int32
+	updated_at      *uint32
+	addupdated_at   *int32
+	deleted_at      *uint32
+	adddeleted_at   *int32
+	good_id         *uuid.UUID
+	coin_type_id    *uuid.UUID
+	amount          *decimal.Decimal
+	addamount       *decimal.Decimal
+	benefit_date    *uint32
+	addbenefit_date *int32
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*ProfitDetail, error)
+	predicates      []predicate.ProfitDetail
 }
 
-var _ ent.Mutation = (*DetailMutation)(nil)
+var _ ent.Mutation = (*ProfitDetailMutation)(nil)
 
-// detailOption allows management of the mutation configuration using functional options.
-type detailOption func(*DetailMutation)
+// profitdetailOption allows management of the mutation configuration using functional options.
+type profitdetailOption func(*ProfitDetailMutation)
 
-// newDetailMutation creates new mutation for the Detail entity.
-func newDetailMutation(c config, op Op, opts ...detailOption) *DetailMutation {
-	m := &DetailMutation{
+// newProfitDetailMutation creates new mutation for the ProfitDetail entity.
+func newProfitDetailMutation(c config, op Op, opts ...profitdetailOption) *ProfitDetailMutation {
+	m := &ProfitDetailMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeDetail,
+		typ:           TypeProfitDetail,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -79,20 +75,20 @@ func newDetailMutation(c config, op Op, opts ...detailOption) *DetailMutation {
 	return m
 }
 
-// withDetailID sets the ID field of the mutation.
-func withDetailID(id uuid.UUID) detailOption {
-	return func(m *DetailMutation) {
+// withProfitDetailID sets the ID field of the mutation.
+func withProfitDetailID(id uuid.UUID) profitdetailOption {
+	return func(m *ProfitDetailMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Detail
+			value *ProfitDetail
 		)
-		m.oldValue = func(ctx context.Context) (*Detail, error) {
+		m.oldValue = func(ctx context.Context) (*ProfitDetail, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Detail.Get(ctx, id)
+					value, err = m.Client().ProfitDetail.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -101,10 +97,10 @@ func withDetailID(id uuid.UUID) detailOption {
 	}
 }
 
-// withDetail sets the old Detail of the mutation.
-func withDetail(node *Detail) detailOption {
-	return func(m *DetailMutation) {
-		m.oldValue = func(context.Context) (*Detail, error) {
+// withProfitDetail sets the old ProfitDetail of the mutation.
+func withProfitDetail(node *ProfitDetail) profitdetailOption {
+	return func(m *ProfitDetailMutation) {
+		m.oldValue = func(context.Context) (*ProfitDetail, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -113,7 +109,7 @@ func withDetail(node *Detail) detailOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m DetailMutation) Client() *Client {
+func (m ProfitDetailMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -121,7 +117,7 @@ func (m DetailMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m DetailMutation) Tx() (*Tx, error) {
+func (m ProfitDetailMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -131,14 +127,14 @@ func (m DetailMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Detail entities.
-func (m *DetailMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of ProfitDetail entities.
+func (m *ProfitDetailMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *DetailMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProfitDetailMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -149,7 +145,7 @@ func (m *DetailMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *DetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *ProfitDetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -158,20 +154,20 @@ func (m *DetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Detail.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().ProfitDetail.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *DetailMutation) SetCreatedAt(u uint32) {
+func (m *ProfitDetailMutation) SetCreatedAt(u uint32) {
 	m.created_at = &u
 	m.addcreated_at = nil
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *DetailMutation) CreatedAt() (r uint32, exists bool) {
+func (m *ProfitDetailMutation) CreatedAt() (r uint32, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -179,10 +175,10 @@ func (m *DetailMutation) CreatedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitDetailMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -197,7 +193,7 @@ func (m *DetailMutation) OldCreatedAt(ctx context.Context) (v uint32, err error)
 }
 
 // AddCreatedAt adds u to the "created_at" field.
-func (m *DetailMutation) AddCreatedAt(u int32) {
+func (m *ProfitDetailMutation) AddCreatedAt(u int32) {
 	if m.addcreated_at != nil {
 		*m.addcreated_at += u
 	} else {
@@ -206,7 +202,7 @@ func (m *DetailMutation) AddCreatedAt(u int32) {
 }
 
 // AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
-func (m *DetailMutation) AddedCreatedAt() (r int32, exists bool) {
+func (m *ProfitDetailMutation) AddedCreatedAt() (r int32, exists bool) {
 	v := m.addcreated_at
 	if v == nil {
 		return
@@ -215,19 +211,19 @@ func (m *DetailMutation) AddedCreatedAt() (r int32, exists bool) {
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *DetailMutation) ResetCreatedAt() {
+func (m *ProfitDetailMutation) ResetCreatedAt() {
 	m.created_at = nil
 	m.addcreated_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *DetailMutation) SetUpdatedAt(u uint32) {
+func (m *ProfitDetailMutation) SetUpdatedAt(u uint32) {
 	m.updated_at = &u
 	m.addupdated_at = nil
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *DetailMutation) UpdatedAt() (r uint32, exists bool) {
+func (m *ProfitDetailMutation) UpdatedAt() (r uint32, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -235,10 +231,10 @@ func (m *DetailMutation) UpdatedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitDetailMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -253,7 +249,7 @@ func (m *DetailMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error)
 }
 
 // AddUpdatedAt adds u to the "updated_at" field.
-func (m *DetailMutation) AddUpdatedAt(u int32) {
+func (m *ProfitDetailMutation) AddUpdatedAt(u int32) {
 	if m.addupdated_at != nil {
 		*m.addupdated_at += u
 	} else {
@@ -262,7 +258,7 @@ func (m *DetailMutation) AddUpdatedAt(u int32) {
 }
 
 // AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
-func (m *DetailMutation) AddedUpdatedAt() (r int32, exists bool) {
+func (m *ProfitDetailMutation) AddedUpdatedAt() (r int32, exists bool) {
 	v := m.addupdated_at
 	if v == nil {
 		return
@@ -271,19 +267,19 @@ func (m *DetailMutation) AddedUpdatedAt() (r int32, exists bool) {
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *DetailMutation) ResetUpdatedAt() {
+func (m *ProfitDetailMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 	m.addupdated_at = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (m *DetailMutation) SetDeletedAt(u uint32) {
+func (m *ProfitDetailMutation) SetDeletedAt(u uint32) {
 	m.deleted_at = &u
 	m.adddeleted_at = nil
 }
 
 // DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *DetailMutation) DeletedAt() (r uint32, exists bool) {
+func (m *ProfitDetailMutation) DeletedAt() (r uint32, exists bool) {
 	v := m.deleted_at
 	if v == nil {
 		return
@@ -291,10 +287,10 @@ func (m *DetailMutation) DeletedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldDeletedAt returns the old "deleted_at" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldDeletedAt returns the old "deleted_at" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitDetailMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -309,7 +305,7 @@ func (m *DetailMutation) OldDeletedAt(ctx context.Context) (v uint32, err error)
 }
 
 // AddDeletedAt adds u to the "deleted_at" field.
-func (m *DetailMutation) AddDeletedAt(u int32) {
+func (m *ProfitDetailMutation) AddDeletedAt(u int32) {
 	if m.adddeleted_at != nil {
 		*m.adddeleted_at += u
 	} else {
@@ -318,7 +314,7 @@ func (m *DetailMutation) AddDeletedAt(u int32) {
 }
 
 // AddedDeletedAt returns the value that was added to the "deleted_at" field in this mutation.
-func (m *DetailMutation) AddedDeletedAt() (r int32, exists bool) {
+func (m *ProfitDetailMutation) AddedDeletedAt() (r int32, exists bool) {
 	v := m.adddeleted_at
 	if v == nil {
 		return
@@ -327,116 +323,67 @@ func (m *DetailMutation) AddedDeletedAt() (r int32, exists bool) {
 }
 
 // ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *DetailMutation) ResetDeletedAt() {
+func (m *ProfitDetailMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
 }
 
-// SetAppID sets the "app_id" field.
-func (m *DetailMutation) SetAppID(u uuid.UUID) {
-	m.app_id = &u
+// SetGoodID sets the "good_id" field.
+func (m *ProfitDetailMutation) SetGoodID(u uuid.UUID) {
+	m.good_id = &u
 }
 
-// AppID returns the value of the "app_id" field in the mutation.
-func (m *DetailMutation) AppID() (r uuid.UUID, exists bool) {
-	v := m.app_id
+// GoodID returns the value of the "good_id" field in the mutation.
+func (m *ProfitDetailMutation) GoodID() (r uuid.UUID, exists bool) {
+	v := m.good_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAppID returns the old "app_id" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldGoodID returns the old "good_id" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldAppID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ProfitDetailMutation) OldGoodID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAppID is only allowed on UpdateOne operations")
+		return v, errors.New("OldGoodID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAppID requires an ID field in the mutation")
+		return v, errors.New("OldGoodID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAppID: %w", err)
+		return v, fmt.Errorf("querying old value for OldGoodID: %w", err)
 	}
-	return oldValue.AppID, nil
+	return oldValue.GoodID, nil
 }
 
-// ClearAppID clears the value of the "app_id" field.
-func (m *DetailMutation) ClearAppID() {
-	m.app_id = nil
-	m.clearedFields[detail.FieldAppID] = struct{}{}
+// ClearGoodID clears the value of the "good_id" field.
+func (m *ProfitDetailMutation) ClearGoodID() {
+	m.good_id = nil
+	m.clearedFields[profitdetail.FieldGoodID] = struct{}{}
 }
 
-// AppIDCleared returns if the "app_id" field was cleared in this mutation.
-func (m *DetailMutation) AppIDCleared() bool {
-	_, ok := m.clearedFields[detail.FieldAppID]
+// GoodIDCleared returns if the "good_id" field was cleared in this mutation.
+func (m *ProfitDetailMutation) GoodIDCleared() bool {
+	_, ok := m.clearedFields[profitdetail.FieldGoodID]
 	return ok
 }
 
-// ResetAppID resets all changes to the "app_id" field.
-func (m *DetailMutation) ResetAppID() {
-	m.app_id = nil
-	delete(m.clearedFields, detail.FieldAppID)
-}
-
-// SetUserID sets the "user_id" field.
-func (m *DetailMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *DetailMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (m *DetailMutation) ClearUserID() {
-	m.user_id = nil
-	m.clearedFields[detail.FieldUserID] = struct{}{}
-}
-
-// UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *DetailMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[detail.FieldUserID]
-	return ok
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *DetailMutation) ResetUserID() {
-	m.user_id = nil
-	delete(m.clearedFields, detail.FieldUserID)
+// ResetGoodID resets all changes to the "good_id" field.
+func (m *ProfitDetailMutation) ResetGoodID() {
+	m.good_id = nil
+	delete(m.clearedFields, profitdetail.FieldGoodID)
 }
 
 // SetCoinTypeID sets the "coin_type_id" field.
-func (m *DetailMutation) SetCoinTypeID(u uuid.UUID) {
+func (m *ProfitDetailMutation) SetCoinTypeID(u uuid.UUID) {
 	m.coin_type_id = &u
 }
 
 // CoinTypeID returns the value of the "coin_type_id" field in the mutation.
-func (m *DetailMutation) CoinTypeID() (r uuid.UUID, exists bool) {
+func (m *ProfitDetailMutation) CoinTypeID() (r uuid.UUID, exists bool) {
 	v := m.coin_type_id
 	if v == nil {
 		return
@@ -444,10 +391,10 @@ func (m *DetailMutation) CoinTypeID() (r uuid.UUID, exists bool) {
 	return *v, true
 }
 
-// OldCoinTypeID returns the old "coin_type_id" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldCoinTypeID returns the old "coin_type_id" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ProfitDetailMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCoinTypeID is only allowed on UpdateOne operations")
 	}
@@ -462,129 +409,31 @@ func (m *DetailMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err er
 }
 
 // ClearCoinTypeID clears the value of the "coin_type_id" field.
-func (m *DetailMutation) ClearCoinTypeID() {
+func (m *ProfitDetailMutation) ClearCoinTypeID() {
 	m.coin_type_id = nil
-	m.clearedFields[detail.FieldCoinTypeID] = struct{}{}
+	m.clearedFields[profitdetail.FieldCoinTypeID] = struct{}{}
 }
 
 // CoinTypeIDCleared returns if the "coin_type_id" field was cleared in this mutation.
-func (m *DetailMutation) CoinTypeIDCleared() bool {
-	_, ok := m.clearedFields[detail.FieldCoinTypeID]
+func (m *ProfitDetailMutation) CoinTypeIDCleared() bool {
+	_, ok := m.clearedFields[profitdetail.FieldCoinTypeID]
 	return ok
 }
 
 // ResetCoinTypeID resets all changes to the "coin_type_id" field.
-func (m *DetailMutation) ResetCoinTypeID() {
+func (m *ProfitDetailMutation) ResetCoinTypeID() {
 	m.coin_type_id = nil
-	delete(m.clearedFields, detail.FieldCoinTypeID)
-}
-
-// SetIoType sets the "io_type" field.
-func (m *DetailMutation) SetIoType(s string) {
-	m.io_type = &s
-}
-
-// IoType returns the value of the "io_type" field in the mutation.
-func (m *DetailMutation) IoType() (r string, exists bool) {
-	v := m.io_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIoType returns the old "io_type" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldIoType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIoType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIoType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIoType: %w", err)
-	}
-	return oldValue.IoType, nil
-}
-
-// ClearIoType clears the value of the "io_type" field.
-func (m *DetailMutation) ClearIoType() {
-	m.io_type = nil
-	m.clearedFields[detail.FieldIoType] = struct{}{}
-}
-
-// IoTypeCleared returns if the "io_type" field was cleared in this mutation.
-func (m *DetailMutation) IoTypeCleared() bool {
-	_, ok := m.clearedFields[detail.FieldIoType]
-	return ok
-}
-
-// ResetIoType resets all changes to the "io_type" field.
-func (m *DetailMutation) ResetIoType() {
-	m.io_type = nil
-	delete(m.clearedFields, detail.FieldIoType)
-}
-
-// SetIoSubType sets the "io_sub_type" field.
-func (m *DetailMutation) SetIoSubType(s string) {
-	m.io_sub_type = &s
-}
-
-// IoSubType returns the value of the "io_sub_type" field in the mutation.
-func (m *DetailMutation) IoSubType() (r string, exists bool) {
-	v := m.io_sub_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIoSubType returns the old "io_sub_type" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldIoSubType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIoSubType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIoSubType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIoSubType: %w", err)
-	}
-	return oldValue.IoSubType, nil
-}
-
-// ClearIoSubType clears the value of the "io_sub_type" field.
-func (m *DetailMutation) ClearIoSubType() {
-	m.io_sub_type = nil
-	m.clearedFields[detail.FieldIoSubType] = struct{}{}
-}
-
-// IoSubTypeCleared returns if the "io_sub_type" field was cleared in this mutation.
-func (m *DetailMutation) IoSubTypeCleared() bool {
-	_, ok := m.clearedFields[detail.FieldIoSubType]
-	return ok
-}
-
-// ResetIoSubType resets all changes to the "io_sub_type" field.
-func (m *DetailMutation) ResetIoSubType() {
-	m.io_sub_type = nil
-	delete(m.clearedFields, detail.FieldIoSubType)
+	delete(m.clearedFields, profitdetail.FieldCoinTypeID)
 }
 
 // SetAmount sets the "amount" field.
-func (m *DetailMutation) SetAmount(d decimal.Decimal) {
+func (m *ProfitDetailMutation) SetAmount(d decimal.Decimal) {
 	m.amount = &d
 	m.addamount = nil
 }
 
 // Amount returns the value of the "amount" field in the mutation.
-func (m *DetailMutation) Amount() (r decimal.Decimal, exists bool) {
+func (m *ProfitDetailMutation) Amount() (r decimal.Decimal, exists bool) {
 	v := m.amount
 	if v == nil {
 		return
@@ -592,10 +441,10 @@ func (m *DetailMutation) Amount() (r decimal.Decimal, exists bool) {
 	return *v, true
 }
 
-// OldAmount returns the old "amount" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldAmount returns the old "amount" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldAmount(ctx context.Context) (v decimal.Decimal, err error) {
+func (m *ProfitDetailMutation) OldAmount(ctx context.Context) (v decimal.Decimal, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
 	}
@@ -610,7 +459,7 @@ func (m *DetailMutation) OldAmount(ctx context.Context) (v decimal.Decimal, err 
 }
 
 // AddAmount adds d to the "amount" field.
-func (m *DetailMutation) AddAmount(d decimal.Decimal) {
+func (m *ProfitDetailMutation) AddAmount(d decimal.Decimal) {
 	if m.addamount != nil {
 		*m.addamount = m.addamount.Add(d)
 	} else {
@@ -619,7 +468,7 @@ func (m *DetailMutation) AddAmount(d decimal.Decimal) {
 }
 
 // AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *DetailMutation) AddedAmount() (r decimal.Decimal, exists bool) {
+func (m *ProfitDetailMutation) AddedAmount() (r decimal.Decimal, exists bool) {
 	v := m.addamount
 	if v == nil {
 		return
@@ -628,300 +477,135 @@ func (m *DetailMutation) AddedAmount() (r decimal.Decimal, exists bool) {
 }
 
 // ClearAmount clears the value of the "amount" field.
-func (m *DetailMutation) ClearAmount() {
+func (m *ProfitDetailMutation) ClearAmount() {
 	m.amount = nil
 	m.addamount = nil
-	m.clearedFields[detail.FieldAmount] = struct{}{}
+	m.clearedFields[profitdetail.FieldAmount] = struct{}{}
 }
 
 // AmountCleared returns if the "amount" field was cleared in this mutation.
-func (m *DetailMutation) AmountCleared() bool {
-	_, ok := m.clearedFields[detail.FieldAmount]
+func (m *ProfitDetailMutation) AmountCleared() bool {
+	_, ok := m.clearedFields[profitdetail.FieldAmount]
 	return ok
 }
 
 // ResetAmount resets all changes to the "amount" field.
-func (m *DetailMutation) ResetAmount() {
+func (m *ProfitDetailMutation) ResetAmount() {
 	m.amount = nil
 	m.addamount = nil
-	delete(m.clearedFields, detail.FieldAmount)
+	delete(m.clearedFields, profitdetail.FieldAmount)
 }
 
-// SetFromCoinTypeID sets the "from_coin_type_id" field.
-func (m *DetailMutation) SetFromCoinTypeID(u uuid.UUID) {
-	m.from_coin_type_id = &u
+// SetBenefitDate sets the "benefit_date" field.
+func (m *ProfitDetailMutation) SetBenefitDate(u uint32) {
+	m.benefit_date = &u
+	m.addbenefit_date = nil
 }
 
-// FromCoinTypeID returns the value of the "from_coin_type_id" field in the mutation.
-func (m *DetailMutation) FromCoinTypeID() (r uuid.UUID, exists bool) {
-	v := m.from_coin_type_id
+// BenefitDate returns the value of the "benefit_date" field in the mutation.
+func (m *ProfitDetailMutation) BenefitDate() (r uint32, exists bool) {
+	v := m.benefit_date
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFromCoinTypeID returns the old "from_coin_type_id" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
+// OldBenefitDate returns the old "benefit_date" field's value of the ProfitDetail entity.
+// If the ProfitDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldFromCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ProfitDetailMutation) OldBenefitDate(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFromCoinTypeID is only allowed on UpdateOne operations")
+		return v, errors.New("OldBenefitDate is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFromCoinTypeID requires an ID field in the mutation")
+		return v, errors.New("OldBenefitDate requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFromCoinTypeID: %w", err)
+		return v, fmt.Errorf("querying old value for OldBenefitDate: %w", err)
 	}
-	return oldValue.FromCoinTypeID, nil
+	return oldValue.BenefitDate, nil
 }
 
-// ClearFromCoinTypeID clears the value of the "from_coin_type_id" field.
-func (m *DetailMutation) ClearFromCoinTypeID() {
-	m.from_coin_type_id = nil
-	m.clearedFields[detail.FieldFromCoinTypeID] = struct{}{}
-}
-
-// FromCoinTypeIDCleared returns if the "from_coin_type_id" field was cleared in this mutation.
-func (m *DetailMutation) FromCoinTypeIDCleared() bool {
-	_, ok := m.clearedFields[detail.FieldFromCoinTypeID]
-	return ok
-}
-
-// ResetFromCoinTypeID resets all changes to the "from_coin_type_id" field.
-func (m *DetailMutation) ResetFromCoinTypeID() {
-	m.from_coin_type_id = nil
-	delete(m.clearedFields, detail.FieldFromCoinTypeID)
-}
-
-// SetCoinUsdCurrency sets the "coin_usd_currency" field.
-func (m *DetailMutation) SetCoinUsdCurrency(d decimal.Decimal) {
-	m.coin_usd_currency = &d
-	m.addcoin_usd_currency = nil
-}
-
-// CoinUsdCurrency returns the value of the "coin_usd_currency" field in the mutation.
-func (m *DetailMutation) CoinUsdCurrency() (r decimal.Decimal, exists bool) {
-	v := m.coin_usd_currency
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCoinUsdCurrency returns the old "coin_usd_currency" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldCoinUsdCurrency(ctx context.Context) (v decimal.Decimal, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCoinUsdCurrency is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCoinUsdCurrency requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCoinUsdCurrency: %w", err)
-	}
-	return oldValue.CoinUsdCurrency, nil
-}
-
-// AddCoinUsdCurrency adds d to the "coin_usd_currency" field.
-func (m *DetailMutation) AddCoinUsdCurrency(d decimal.Decimal) {
-	if m.addcoin_usd_currency != nil {
-		*m.addcoin_usd_currency = m.addcoin_usd_currency.Add(d)
+// AddBenefitDate adds u to the "benefit_date" field.
+func (m *ProfitDetailMutation) AddBenefitDate(u int32) {
+	if m.addbenefit_date != nil {
+		*m.addbenefit_date += u
 	} else {
-		m.addcoin_usd_currency = &d
+		m.addbenefit_date = &u
 	}
 }
 
-// AddedCoinUsdCurrency returns the value that was added to the "coin_usd_currency" field in this mutation.
-func (m *DetailMutation) AddedCoinUsdCurrency() (r decimal.Decimal, exists bool) {
-	v := m.addcoin_usd_currency
+// AddedBenefitDate returns the value that was added to the "benefit_date" field in this mutation.
+func (m *ProfitDetailMutation) AddedBenefitDate() (r int32, exists bool) {
+	v := m.addbenefit_date
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearCoinUsdCurrency clears the value of the "coin_usd_currency" field.
-func (m *DetailMutation) ClearCoinUsdCurrency() {
-	m.coin_usd_currency = nil
-	m.addcoin_usd_currency = nil
-	m.clearedFields[detail.FieldCoinUsdCurrency] = struct{}{}
+// ClearBenefitDate clears the value of the "benefit_date" field.
+func (m *ProfitDetailMutation) ClearBenefitDate() {
+	m.benefit_date = nil
+	m.addbenefit_date = nil
+	m.clearedFields[profitdetail.FieldBenefitDate] = struct{}{}
 }
 
-// CoinUsdCurrencyCleared returns if the "coin_usd_currency" field was cleared in this mutation.
-func (m *DetailMutation) CoinUsdCurrencyCleared() bool {
-	_, ok := m.clearedFields[detail.FieldCoinUsdCurrency]
+// BenefitDateCleared returns if the "benefit_date" field was cleared in this mutation.
+func (m *ProfitDetailMutation) BenefitDateCleared() bool {
+	_, ok := m.clearedFields[profitdetail.FieldBenefitDate]
 	return ok
 }
 
-// ResetCoinUsdCurrency resets all changes to the "coin_usd_currency" field.
-func (m *DetailMutation) ResetCoinUsdCurrency() {
-	m.coin_usd_currency = nil
-	m.addcoin_usd_currency = nil
-	delete(m.clearedFields, detail.FieldCoinUsdCurrency)
+// ResetBenefitDate resets all changes to the "benefit_date" field.
+func (m *ProfitDetailMutation) ResetBenefitDate() {
+	m.benefit_date = nil
+	m.addbenefit_date = nil
+	delete(m.clearedFields, profitdetail.FieldBenefitDate)
 }
 
-// SetIoExtra sets the "io_extra" field.
-func (m *DetailMutation) SetIoExtra(s string) {
-	m.io_extra = &s
-}
-
-// IoExtra returns the value of the "io_extra" field in the mutation.
-func (m *DetailMutation) IoExtra() (r string, exists bool) {
-	v := m.io_extra
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIoExtra returns the old "io_extra" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldIoExtra(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIoExtra is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIoExtra requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIoExtra: %w", err)
-	}
-	return oldValue.IoExtra, nil
-}
-
-// ClearIoExtra clears the value of the "io_extra" field.
-func (m *DetailMutation) ClearIoExtra() {
-	m.io_extra = nil
-	m.clearedFields[detail.FieldIoExtra] = struct{}{}
-}
-
-// IoExtraCleared returns if the "io_extra" field was cleared in this mutation.
-func (m *DetailMutation) IoExtraCleared() bool {
-	_, ok := m.clearedFields[detail.FieldIoExtra]
-	return ok
-}
-
-// ResetIoExtra resets all changes to the "io_extra" field.
-func (m *DetailMutation) ResetIoExtra() {
-	m.io_extra = nil
-	delete(m.clearedFields, detail.FieldIoExtra)
-}
-
-// SetFromOldID sets the "from_old_id" field.
-func (m *DetailMutation) SetFromOldID(u uuid.UUID) {
-	m.from_old_id = &u
-}
-
-// FromOldID returns the value of the "from_old_id" field in the mutation.
-func (m *DetailMutation) FromOldID() (r uuid.UUID, exists bool) {
-	v := m.from_old_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFromOldID returns the old "from_old_id" field's value of the Detail entity.
-// If the Detail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetailMutation) OldFromOldID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFromOldID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFromOldID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFromOldID: %w", err)
-	}
-	return oldValue.FromOldID, nil
-}
-
-// ClearFromOldID clears the value of the "from_old_id" field.
-func (m *DetailMutation) ClearFromOldID() {
-	m.from_old_id = nil
-	m.clearedFields[detail.FieldFromOldID] = struct{}{}
-}
-
-// FromOldIDCleared returns if the "from_old_id" field was cleared in this mutation.
-func (m *DetailMutation) FromOldIDCleared() bool {
-	_, ok := m.clearedFields[detail.FieldFromOldID]
-	return ok
-}
-
-// ResetFromOldID resets all changes to the "from_old_id" field.
-func (m *DetailMutation) ResetFromOldID() {
-	m.from_old_id = nil
-	delete(m.clearedFields, detail.FieldFromOldID)
-}
-
-// Where appends a list predicates to the DetailMutation builder.
-func (m *DetailMutation) Where(ps ...predicate.Detail) {
+// Where appends a list predicates to the ProfitDetailMutation builder.
+func (m *ProfitDetailMutation) Where(ps ...predicate.ProfitDetail) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *DetailMutation) Op() Op {
+func (m *ProfitDetailMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Detail).
-func (m *DetailMutation) Type() string {
+// Type returns the node type of this mutation (ProfitDetail).
+func (m *ProfitDetailMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *DetailMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+func (m *ProfitDetailMutation) Fields() []string {
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
-		fields = append(fields, detail.FieldCreatedAt)
+		fields = append(fields, profitdetail.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, detail.FieldUpdatedAt)
+		fields = append(fields, profitdetail.FieldUpdatedAt)
 	}
 	if m.deleted_at != nil {
-		fields = append(fields, detail.FieldDeletedAt)
+		fields = append(fields, profitdetail.FieldDeletedAt)
 	}
-	if m.app_id != nil {
-		fields = append(fields, detail.FieldAppID)
-	}
-	if m.user_id != nil {
-		fields = append(fields, detail.FieldUserID)
+	if m.good_id != nil {
+		fields = append(fields, profitdetail.FieldGoodID)
 	}
 	if m.coin_type_id != nil {
-		fields = append(fields, detail.FieldCoinTypeID)
-	}
-	if m.io_type != nil {
-		fields = append(fields, detail.FieldIoType)
-	}
-	if m.io_sub_type != nil {
-		fields = append(fields, detail.FieldIoSubType)
+		fields = append(fields, profitdetail.FieldCoinTypeID)
 	}
 	if m.amount != nil {
-		fields = append(fields, detail.FieldAmount)
+		fields = append(fields, profitdetail.FieldAmount)
 	}
-	if m.from_coin_type_id != nil {
-		fields = append(fields, detail.FieldFromCoinTypeID)
-	}
-	if m.coin_usd_currency != nil {
-		fields = append(fields, detail.FieldCoinUsdCurrency)
-	}
-	if m.io_extra != nil {
-		fields = append(fields, detail.FieldIoExtra)
-	}
-	if m.from_old_id != nil {
-		fields = append(fields, detail.FieldFromOldID)
+	if m.benefit_date != nil {
+		fields = append(fields, profitdetail.FieldBenefitDate)
 	}
 	return fields
 }
@@ -929,34 +613,22 @@ func (m *DetailMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *DetailMutation) Field(name string) (ent.Value, bool) {
+func (m *ProfitDetailMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		return m.CreatedAt()
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		return m.DeletedAt()
-	case detail.FieldAppID:
-		return m.AppID()
-	case detail.FieldUserID:
-		return m.UserID()
-	case detail.FieldCoinTypeID:
+	case profitdetail.FieldGoodID:
+		return m.GoodID()
+	case profitdetail.FieldCoinTypeID:
 		return m.CoinTypeID()
-	case detail.FieldIoType:
-		return m.IoType()
-	case detail.FieldIoSubType:
-		return m.IoSubType()
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		return m.Amount()
-	case detail.FieldFromCoinTypeID:
-		return m.FromCoinTypeID()
-	case detail.FieldCoinUsdCurrency:
-		return m.CoinUsdCurrency()
-	case detail.FieldIoExtra:
-		return m.IoExtra()
-	case detail.FieldFromOldID:
-		return m.FromOldID()
+	case profitdetail.FieldBenefitDate:
+		return m.BenefitDate()
 	}
 	return nil, false
 }
@@ -964,156 +636,102 @@ func (m *DetailMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *DetailMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *ProfitDetailMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case detail.FieldAppID:
-		return m.OldAppID(ctx)
-	case detail.FieldUserID:
-		return m.OldUserID(ctx)
-	case detail.FieldCoinTypeID:
+	case profitdetail.FieldGoodID:
+		return m.OldGoodID(ctx)
+	case profitdetail.FieldCoinTypeID:
 		return m.OldCoinTypeID(ctx)
-	case detail.FieldIoType:
-		return m.OldIoType(ctx)
-	case detail.FieldIoSubType:
-		return m.OldIoSubType(ctx)
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		return m.OldAmount(ctx)
-	case detail.FieldFromCoinTypeID:
-		return m.OldFromCoinTypeID(ctx)
-	case detail.FieldCoinUsdCurrency:
-		return m.OldCoinUsdCurrency(ctx)
-	case detail.FieldIoExtra:
-		return m.OldIoExtra(ctx)
-	case detail.FieldFromOldID:
-		return m.OldFromOldID(ctx)
+	case profitdetail.FieldBenefitDate:
+		return m.OldBenefitDate(ctx)
 	}
-	return nil, fmt.Errorf("unknown Detail field %s", name)
+	return nil, fmt.Errorf("unknown ProfitDetail field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *DetailMutation) SetField(name string, value ent.Value) error {
+func (m *ProfitDetailMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case detail.FieldAppID:
+	case profitdetail.FieldGoodID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAppID(v)
+		m.SetGoodID(v)
 		return nil
-	case detail.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case detail.FieldCoinTypeID:
+	case profitdetail.FieldCoinTypeID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCoinTypeID(v)
 		return nil
-	case detail.FieldIoType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIoType(v)
-		return nil
-	case detail.FieldIoSubType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIoSubType(v)
-		return nil
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAmount(v)
 		return nil
-	case detail.FieldFromCoinTypeID:
-		v, ok := value.(uuid.UUID)
+	case profitdetail.FieldBenefitDate:
+		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFromCoinTypeID(v)
-		return nil
-	case detail.FieldCoinUsdCurrency:
-		v, ok := value.(decimal.Decimal)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCoinUsdCurrency(v)
-		return nil
-	case detail.FieldIoExtra:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIoExtra(v)
-		return nil
-	case detail.FieldFromOldID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFromOldID(v)
+		m.SetBenefitDate(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Detail field %s", name)
+	return fmt.Errorf("unknown ProfitDetail field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *DetailMutation) AddedFields() []string {
+func (m *ProfitDetailMutation) AddedFields() []string {
 	var fields []string
 	if m.addcreated_at != nil {
-		fields = append(fields, detail.FieldCreatedAt)
+		fields = append(fields, profitdetail.FieldCreatedAt)
 	}
 	if m.addupdated_at != nil {
-		fields = append(fields, detail.FieldUpdatedAt)
+		fields = append(fields, profitdetail.FieldUpdatedAt)
 	}
 	if m.adddeleted_at != nil {
-		fields = append(fields, detail.FieldDeletedAt)
+		fields = append(fields, profitdetail.FieldDeletedAt)
 	}
 	if m.addamount != nil {
-		fields = append(fields, detail.FieldAmount)
+		fields = append(fields, profitdetail.FieldAmount)
 	}
-	if m.addcoin_usd_currency != nil {
-		fields = append(fields, detail.FieldCoinUsdCurrency)
+	if m.addbenefit_date != nil {
+		fields = append(fields, profitdetail.FieldBenefitDate)
 	}
 	return fields
 }
@@ -1121,18 +739,18 @@ func (m *DetailMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *DetailMutation) AddedField(name string) (ent.Value, bool) {
+func (m *ProfitDetailMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		return m.AddedCreatedAt()
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		return m.AddedUpdatedAt()
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		return m.AddedDeletedAt()
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		return m.AddedAmount()
-	case detail.FieldCoinUsdCurrency:
-		return m.AddedCoinUsdCurrency()
+	case profitdetail.FieldBenefitDate:
+		return m.AddedBenefitDate()
 	}
 	return nil, false
 }
@@ -1140,264 +758,207 @@ func (m *DetailMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *DetailMutation) AddField(name string, value ent.Value) error {
+func (m *ProfitDetailMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCreatedAt(v)
 		return nil
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedAt(v)
 		return nil
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDeletedAt(v)
 		return nil
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAmount(v)
 		return nil
-	case detail.FieldCoinUsdCurrency:
-		v, ok := value.(decimal.Decimal)
+	case profitdetail.FieldBenefitDate:
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddCoinUsdCurrency(v)
+		m.AddBenefitDate(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Detail numeric field %s", name)
+	return fmt.Errorf("unknown ProfitDetail numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *DetailMutation) ClearedFields() []string {
+func (m *ProfitDetailMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(detail.FieldAppID) {
-		fields = append(fields, detail.FieldAppID)
+	if m.FieldCleared(profitdetail.FieldGoodID) {
+		fields = append(fields, profitdetail.FieldGoodID)
 	}
-	if m.FieldCleared(detail.FieldUserID) {
-		fields = append(fields, detail.FieldUserID)
+	if m.FieldCleared(profitdetail.FieldCoinTypeID) {
+		fields = append(fields, profitdetail.FieldCoinTypeID)
 	}
-	if m.FieldCleared(detail.FieldCoinTypeID) {
-		fields = append(fields, detail.FieldCoinTypeID)
+	if m.FieldCleared(profitdetail.FieldAmount) {
+		fields = append(fields, profitdetail.FieldAmount)
 	}
-	if m.FieldCleared(detail.FieldIoType) {
-		fields = append(fields, detail.FieldIoType)
-	}
-	if m.FieldCleared(detail.FieldIoSubType) {
-		fields = append(fields, detail.FieldIoSubType)
-	}
-	if m.FieldCleared(detail.FieldAmount) {
-		fields = append(fields, detail.FieldAmount)
-	}
-	if m.FieldCleared(detail.FieldFromCoinTypeID) {
-		fields = append(fields, detail.FieldFromCoinTypeID)
-	}
-	if m.FieldCleared(detail.FieldCoinUsdCurrency) {
-		fields = append(fields, detail.FieldCoinUsdCurrency)
-	}
-	if m.FieldCleared(detail.FieldIoExtra) {
-		fields = append(fields, detail.FieldIoExtra)
-	}
-	if m.FieldCleared(detail.FieldFromOldID) {
-		fields = append(fields, detail.FieldFromOldID)
+	if m.FieldCleared(profitdetail.FieldBenefitDate) {
+		fields = append(fields, profitdetail.FieldBenefitDate)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *DetailMutation) FieldCleared(name string) bool {
+func (m *ProfitDetailMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *DetailMutation) ClearField(name string) error {
+func (m *ProfitDetailMutation) ClearField(name string) error {
 	switch name {
-	case detail.FieldAppID:
-		m.ClearAppID()
+	case profitdetail.FieldGoodID:
+		m.ClearGoodID()
 		return nil
-	case detail.FieldUserID:
-		m.ClearUserID()
-		return nil
-	case detail.FieldCoinTypeID:
+	case profitdetail.FieldCoinTypeID:
 		m.ClearCoinTypeID()
 		return nil
-	case detail.FieldIoType:
-		m.ClearIoType()
-		return nil
-	case detail.FieldIoSubType:
-		m.ClearIoSubType()
-		return nil
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		m.ClearAmount()
 		return nil
-	case detail.FieldFromCoinTypeID:
-		m.ClearFromCoinTypeID()
-		return nil
-	case detail.FieldCoinUsdCurrency:
-		m.ClearCoinUsdCurrency()
-		return nil
-	case detail.FieldIoExtra:
-		m.ClearIoExtra()
-		return nil
-	case detail.FieldFromOldID:
-		m.ClearFromOldID()
+	case profitdetail.FieldBenefitDate:
+		m.ClearBenefitDate()
 		return nil
 	}
-	return fmt.Errorf("unknown Detail nullable field %s", name)
+	return fmt.Errorf("unknown ProfitDetail nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *DetailMutation) ResetField(name string) error {
+func (m *ProfitDetailMutation) ResetField(name string) error {
 	switch name {
-	case detail.FieldCreatedAt:
+	case profitdetail.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case detail.FieldUpdatedAt:
+	case profitdetail.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case detail.FieldDeletedAt:
+	case profitdetail.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case detail.FieldAppID:
-		m.ResetAppID()
+	case profitdetail.FieldGoodID:
+		m.ResetGoodID()
 		return nil
-	case detail.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case detail.FieldCoinTypeID:
+	case profitdetail.FieldCoinTypeID:
 		m.ResetCoinTypeID()
 		return nil
-	case detail.FieldIoType:
-		m.ResetIoType()
-		return nil
-	case detail.FieldIoSubType:
-		m.ResetIoSubType()
-		return nil
-	case detail.FieldAmount:
+	case profitdetail.FieldAmount:
 		m.ResetAmount()
 		return nil
-	case detail.FieldFromCoinTypeID:
-		m.ResetFromCoinTypeID()
-		return nil
-	case detail.FieldCoinUsdCurrency:
-		m.ResetCoinUsdCurrency()
-		return nil
-	case detail.FieldIoExtra:
-		m.ResetIoExtra()
-		return nil
-	case detail.FieldFromOldID:
-		m.ResetFromOldID()
+	case profitdetail.FieldBenefitDate:
+		m.ResetBenefitDate()
 		return nil
 	}
-	return fmt.Errorf("unknown Detail field %s", name)
+	return fmt.Errorf("unknown ProfitDetail field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *DetailMutation) AddedEdges() []string {
+func (m *ProfitDetailMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *DetailMutation) AddedIDs(name string) []ent.Value {
+func (m *ProfitDetailMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *DetailMutation) RemovedEdges() []string {
+func (m *ProfitDetailMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *DetailMutation) RemovedIDs(name string) []ent.Value {
+func (m *ProfitDetailMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *DetailMutation) ClearedEdges() []string {
+func (m *ProfitDetailMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *DetailMutation) EdgeCleared(name string) bool {
+func (m *ProfitDetailMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *DetailMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown Detail unique edge %s", name)
+func (m *ProfitDetailMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ProfitDetail unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *DetailMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown Detail edge %s", name)
+func (m *ProfitDetailMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ProfitDetail edge %s", name)
 }
 
-// GeneralMutation represents an operation that mutates the General nodes in the graph.
-type GeneralMutation struct {
+// ProfitGeneralMutation represents an operation that mutates the ProfitGeneral nodes in the graph.
+type ProfitGeneralMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *uint32
-	addcreated_at *int32
-	updated_at    *uint32
-	addupdated_at *int32
-	deleted_at    *uint32
-	adddeleted_at *int32
-	app_id        *uuid.UUID
-	user_id       *uuid.UUID
-	coin_type_id  *uuid.UUID
-	incoming      *decimal.Decimal
-	addincoming   *decimal.Decimal
-	locked        *decimal.Decimal
-	addlocked     *decimal.Decimal
-	outcoming     *decimal.Decimal
-	addoutcoming  *decimal.Decimal
-	spendable     *decimal.Decimal
-	addspendable  *decimal.Decimal
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*General, error)
-	predicates    []predicate.General
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *uint32
+	addcreated_at  *int32
+	updated_at     *uint32
+	addupdated_at  *int32
+	deleted_at     *uint32
+	adddeleted_at  *int32
+	good_id        *uuid.UUID
+	coin_type_id   *uuid.UUID
+	amount         *decimal.Decimal
+	addamount      *decimal.Decimal
+	to_platform    *decimal.Decimal
+	addto_platform *decimal.Decimal
+	to_user        *decimal.Decimal
+	addto_user     *decimal.Decimal
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*ProfitGeneral, error)
+	predicates     []predicate.ProfitGeneral
 }
 
-var _ ent.Mutation = (*GeneralMutation)(nil)
+var _ ent.Mutation = (*ProfitGeneralMutation)(nil)
 
-// generalOption allows management of the mutation configuration using functional options.
-type generalOption func(*GeneralMutation)
+// profitgeneralOption allows management of the mutation configuration using functional options.
+type profitgeneralOption func(*ProfitGeneralMutation)
 
-// newGeneralMutation creates new mutation for the General entity.
-func newGeneralMutation(c config, op Op, opts ...generalOption) *GeneralMutation {
-	m := &GeneralMutation{
+// newProfitGeneralMutation creates new mutation for the ProfitGeneral entity.
+func newProfitGeneralMutation(c config, op Op, opts ...profitgeneralOption) *ProfitGeneralMutation {
+	m := &ProfitGeneralMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeGeneral,
+		typ:           TypeProfitGeneral,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -1406,20 +967,20 @@ func newGeneralMutation(c config, op Op, opts ...generalOption) *GeneralMutation
 	return m
 }
 
-// withGeneralID sets the ID field of the mutation.
-func withGeneralID(id uuid.UUID) generalOption {
-	return func(m *GeneralMutation) {
+// withProfitGeneralID sets the ID field of the mutation.
+func withProfitGeneralID(id uuid.UUID) profitgeneralOption {
+	return func(m *ProfitGeneralMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *General
+			value *ProfitGeneral
 		)
-		m.oldValue = func(ctx context.Context) (*General, error) {
+		m.oldValue = func(ctx context.Context) (*ProfitGeneral, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().General.Get(ctx, id)
+					value, err = m.Client().ProfitGeneral.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -1428,10 +989,10 @@ func withGeneralID(id uuid.UUID) generalOption {
 	}
 }
 
-// withGeneral sets the old General of the mutation.
-func withGeneral(node *General) generalOption {
-	return func(m *GeneralMutation) {
-		m.oldValue = func(context.Context) (*General, error) {
+// withProfitGeneral sets the old ProfitGeneral of the mutation.
+func withProfitGeneral(node *ProfitGeneral) profitgeneralOption {
+	return func(m *ProfitGeneralMutation) {
+		m.oldValue = func(context.Context) (*ProfitGeneral, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -1440,7 +1001,7 @@ func withGeneral(node *General) generalOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m GeneralMutation) Client() *Client {
+func (m ProfitGeneralMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -1448,7 +1009,7 @@ func (m GeneralMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m GeneralMutation) Tx() (*Tx, error) {
+func (m ProfitGeneralMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -1458,14 +1019,14 @@ func (m GeneralMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of General entities.
-func (m *GeneralMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of ProfitGeneral entities.
+func (m *ProfitGeneralMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *GeneralMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProfitGeneralMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1476,7 +1037,7 @@ func (m *GeneralMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *GeneralMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *ProfitGeneralMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -1485,20 +1046,20 @@ func (m *GeneralMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().General.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().ProfitGeneral.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *GeneralMutation) SetCreatedAt(u uint32) {
+func (m *ProfitGeneralMutation) SetCreatedAt(u uint32) {
 	m.created_at = &u
 	m.addcreated_at = nil
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *GeneralMutation) CreatedAt() (r uint32, exists bool) {
+func (m *ProfitGeneralMutation) CreatedAt() (r uint32, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -1506,10 +1067,10 @@ func (m *GeneralMutation) CreatedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitGeneralMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -1524,7 +1085,7 @@ func (m *GeneralMutation) OldCreatedAt(ctx context.Context) (v uint32, err error
 }
 
 // AddCreatedAt adds u to the "created_at" field.
-func (m *GeneralMutation) AddCreatedAt(u int32) {
+func (m *ProfitGeneralMutation) AddCreatedAt(u int32) {
 	if m.addcreated_at != nil {
 		*m.addcreated_at += u
 	} else {
@@ -1533,7 +1094,7 @@ func (m *GeneralMutation) AddCreatedAt(u int32) {
 }
 
 // AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
-func (m *GeneralMutation) AddedCreatedAt() (r int32, exists bool) {
+func (m *ProfitGeneralMutation) AddedCreatedAt() (r int32, exists bool) {
 	v := m.addcreated_at
 	if v == nil {
 		return
@@ -1542,19 +1103,19 @@ func (m *GeneralMutation) AddedCreatedAt() (r int32, exists bool) {
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *GeneralMutation) ResetCreatedAt() {
+func (m *ProfitGeneralMutation) ResetCreatedAt() {
 	m.created_at = nil
 	m.addcreated_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *GeneralMutation) SetUpdatedAt(u uint32) {
+func (m *ProfitGeneralMutation) SetUpdatedAt(u uint32) {
 	m.updated_at = &u
 	m.addupdated_at = nil
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *GeneralMutation) UpdatedAt() (r uint32, exists bool) {
+func (m *ProfitGeneralMutation) UpdatedAt() (r uint32, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -1562,10 +1123,10 @@ func (m *GeneralMutation) UpdatedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitGeneralMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -1580,7 +1141,7 @@ func (m *GeneralMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error
 }
 
 // AddUpdatedAt adds u to the "updated_at" field.
-func (m *GeneralMutation) AddUpdatedAt(u int32) {
+func (m *ProfitGeneralMutation) AddUpdatedAt(u int32) {
 	if m.addupdated_at != nil {
 		*m.addupdated_at += u
 	} else {
@@ -1589,7 +1150,7 @@ func (m *GeneralMutation) AddUpdatedAt(u int32) {
 }
 
 // AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
-func (m *GeneralMutation) AddedUpdatedAt() (r int32, exists bool) {
+func (m *ProfitGeneralMutation) AddedUpdatedAt() (r int32, exists bool) {
 	v := m.addupdated_at
 	if v == nil {
 		return
@@ -1598,19 +1159,19 @@ func (m *GeneralMutation) AddedUpdatedAt() (r int32, exists bool) {
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *GeneralMutation) ResetUpdatedAt() {
+func (m *ProfitGeneralMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 	m.addupdated_at = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (m *GeneralMutation) SetDeletedAt(u uint32) {
+func (m *ProfitGeneralMutation) SetDeletedAt(u uint32) {
 	m.deleted_at = &u
 	m.adddeleted_at = nil
 }
 
 // DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *GeneralMutation) DeletedAt() (r uint32, exists bool) {
+func (m *ProfitGeneralMutation) DeletedAt() (r uint32, exists bool) {
 	v := m.deleted_at
 	if v == nil {
 		return
@@ -1618,10 +1179,10 @@ func (m *GeneralMutation) DeletedAt() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldDeletedAt returns the old "deleted_at" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldDeletedAt returns the old "deleted_at" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
+func (m *ProfitGeneralMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -1636,7 +1197,7 @@ func (m *GeneralMutation) OldDeletedAt(ctx context.Context) (v uint32, err error
 }
 
 // AddDeletedAt adds u to the "deleted_at" field.
-func (m *GeneralMutation) AddDeletedAt(u int32) {
+func (m *ProfitGeneralMutation) AddDeletedAt(u int32) {
 	if m.adddeleted_at != nil {
 		*m.adddeleted_at += u
 	} else {
@@ -1645,7 +1206,7 @@ func (m *GeneralMutation) AddDeletedAt(u int32) {
 }
 
 // AddedDeletedAt returns the value that was added to the "deleted_at" field in this mutation.
-func (m *GeneralMutation) AddedDeletedAt() (r int32, exists bool) {
+func (m *ProfitGeneralMutation) AddedDeletedAt() (r int32, exists bool) {
 	v := m.adddeleted_at
 	if v == nil {
 		return
@@ -1654,116 +1215,67 @@ func (m *GeneralMutation) AddedDeletedAt() (r int32, exists bool) {
 }
 
 // ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *GeneralMutation) ResetDeletedAt() {
+func (m *ProfitGeneralMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
 }
 
-// SetAppID sets the "app_id" field.
-func (m *GeneralMutation) SetAppID(u uuid.UUID) {
-	m.app_id = &u
+// SetGoodID sets the "good_id" field.
+func (m *ProfitGeneralMutation) SetGoodID(u uuid.UUID) {
+	m.good_id = &u
 }
 
-// AppID returns the value of the "app_id" field in the mutation.
-func (m *GeneralMutation) AppID() (r uuid.UUID, exists bool) {
-	v := m.app_id
+// GoodID returns the value of the "good_id" field in the mutation.
+func (m *ProfitGeneralMutation) GoodID() (r uuid.UUID, exists bool) {
+	v := m.good_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAppID returns the old "app_id" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldGoodID returns the old "good_id" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldAppID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ProfitGeneralMutation) OldGoodID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAppID is only allowed on UpdateOne operations")
+		return v, errors.New("OldGoodID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAppID requires an ID field in the mutation")
+		return v, errors.New("OldGoodID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAppID: %w", err)
+		return v, fmt.Errorf("querying old value for OldGoodID: %w", err)
 	}
-	return oldValue.AppID, nil
+	return oldValue.GoodID, nil
 }
 
-// ClearAppID clears the value of the "app_id" field.
-func (m *GeneralMutation) ClearAppID() {
-	m.app_id = nil
-	m.clearedFields[general.FieldAppID] = struct{}{}
+// ClearGoodID clears the value of the "good_id" field.
+func (m *ProfitGeneralMutation) ClearGoodID() {
+	m.good_id = nil
+	m.clearedFields[profitgeneral.FieldGoodID] = struct{}{}
 }
 
-// AppIDCleared returns if the "app_id" field was cleared in this mutation.
-func (m *GeneralMutation) AppIDCleared() bool {
-	_, ok := m.clearedFields[general.FieldAppID]
+// GoodIDCleared returns if the "good_id" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) GoodIDCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldGoodID]
 	return ok
 }
 
-// ResetAppID resets all changes to the "app_id" field.
-func (m *GeneralMutation) ResetAppID() {
-	m.app_id = nil
-	delete(m.clearedFields, general.FieldAppID)
-}
-
-// SetUserID sets the "user_id" field.
-func (m *GeneralMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *GeneralMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (m *GeneralMutation) ClearUserID() {
-	m.user_id = nil
-	m.clearedFields[general.FieldUserID] = struct{}{}
-}
-
-// UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *GeneralMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[general.FieldUserID]
-	return ok
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *GeneralMutation) ResetUserID() {
-	m.user_id = nil
-	delete(m.clearedFields, general.FieldUserID)
+// ResetGoodID resets all changes to the "good_id" field.
+func (m *ProfitGeneralMutation) ResetGoodID() {
+	m.good_id = nil
+	delete(m.clearedFields, profitgeneral.FieldGoodID)
 }
 
 // SetCoinTypeID sets the "coin_type_id" field.
-func (m *GeneralMutation) SetCoinTypeID(u uuid.UUID) {
+func (m *ProfitGeneralMutation) SetCoinTypeID(u uuid.UUID) {
 	m.coin_type_id = &u
 }
 
 // CoinTypeID returns the value of the "coin_type_id" field in the mutation.
-func (m *GeneralMutation) CoinTypeID() (r uuid.UUID, exists bool) {
+func (m *ProfitGeneralMutation) CoinTypeID() (r uuid.UUID, exists bool) {
 	v := m.coin_type_id
 	if v == nil {
 		return
@@ -1771,10 +1283,10 @@ func (m *GeneralMutation) CoinTypeID() (r uuid.UUID, exists bool) {
 	return *v, true
 }
 
-// OldCoinTypeID returns the old "coin_type_id" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldCoinTypeID returns the old "coin_type_id" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ProfitGeneralMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCoinTypeID is only allowed on UpdateOne operations")
 	}
@@ -1789,352 +1301,276 @@ func (m *GeneralMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err e
 }
 
 // ClearCoinTypeID clears the value of the "coin_type_id" field.
-func (m *GeneralMutation) ClearCoinTypeID() {
+func (m *ProfitGeneralMutation) ClearCoinTypeID() {
 	m.coin_type_id = nil
-	m.clearedFields[general.FieldCoinTypeID] = struct{}{}
+	m.clearedFields[profitgeneral.FieldCoinTypeID] = struct{}{}
 }
 
 // CoinTypeIDCleared returns if the "coin_type_id" field was cleared in this mutation.
-func (m *GeneralMutation) CoinTypeIDCleared() bool {
-	_, ok := m.clearedFields[general.FieldCoinTypeID]
+func (m *ProfitGeneralMutation) CoinTypeIDCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldCoinTypeID]
 	return ok
 }
 
 // ResetCoinTypeID resets all changes to the "coin_type_id" field.
-func (m *GeneralMutation) ResetCoinTypeID() {
+func (m *ProfitGeneralMutation) ResetCoinTypeID() {
 	m.coin_type_id = nil
-	delete(m.clearedFields, general.FieldCoinTypeID)
+	delete(m.clearedFields, profitgeneral.FieldCoinTypeID)
 }
 
-// SetIncoming sets the "incoming" field.
-func (m *GeneralMutation) SetIncoming(d decimal.Decimal) {
-	m.incoming = &d
-	m.addincoming = nil
+// SetAmount sets the "amount" field.
+func (m *ProfitGeneralMutation) SetAmount(d decimal.Decimal) {
+	m.amount = &d
+	m.addamount = nil
 }
 
-// Incoming returns the value of the "incoming" field in the mutation.
-func (m *GeneralMutation) Incoming() (r decimal.Decimal, exists bool) {
-	v := m.incoming
+// Amount returns the value of the "amount" field in the mutation.
+func (m *ProfitGeneralMutation) Amount() (r decimal.Decimal, exists bool) {
+	v := m.amount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIncoming returns the old "incoming" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldAmount returns the old "amount" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldIncoming(ctx context.Context) (v decimal.Decimal, err error) {
+func (m *ProfitGeneralMutation) OldAmount(ctx context.Context) (v decimal.Decimal, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIncoming is only allowed on UpdateOne operations")
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIncoming requires an ID field in the mutation")
+		return v, errors.New("OldAmount requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIncoming: %w", err)
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
 	}
-	return oldValue.Incoming, nil
+	return oldValue.Amount, nil
 }
 
-// AddIncoming adds d to the "incoming" field.
-func (m *GeneralMutation) AddIncoming(d decimal.Decimal) {
-	if m.addincoming != nil {
-		*m.addincoming = m.addincoming.Add(d)
+// AddAmount adds d to the "amount" field.
+func (m *ProfitGeneralMutation) AddAmount(d decimal.Decimal) {
+	if m.addamount != nil {
+		*m.addamount = m.addamount.Add(d)
 	} else {
-		m.addincoming = &d
+		m.addamount = &d
 	}
 }
 
-// AddedIncoming returns the value that was added to the "incoming" field in this mutation.
-func (m *GeneralMutation) AddedIncoming() (r decimal.Decimal, exists bool) {
-	v := m.addincoming
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *ProfitGeneralMutation) AddedAmount() (r decimal.Decimal, exists bool) {
+	v := m.addamount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearIncoming clears the value of the "incoming" field.
-func (m *GeneralMutation) ClearIncoming() {
-	m.incoming = nil
-	m.addincoming = nil
-	m.clearedFields[general.FieldIncoming] = struct{}{}
+// ClearAmount clears the value of the "amount" field.
+func (m *ProfitGeneralMutation) ClearAmount() {
+	m.amount = nil
+	m.addamount = nil
+	m.clearedFields[profitgeneral.FieldAmount] = struct{}{}
 }
 
-// IncomingCleared returns if the "incoming" field was cleared in this mutation.
-func (m *GeneralMutation) IncomingCleared() bool {
-	_, ok := m.clearedFields[general.FieldIncoming]
+// AmountCleared returns if the "amount" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) AmountCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldAmount]
 	return ok
 }
 
-// ResetIncoming resets all changes to the "incoming" field.
-func (m *GeneralMutation) ResetIncoming() {
-	m.incoming = nil
-	m.addincoming = nil
-	delete(m.clearedFields, general.FieldIncoming)
+// ResetAmount resets all changes to the "amount" field.
+func (m *ProfitGeneralMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+	delete(m.clearedFields, profitgeneral.FieldAmount)
 }
 
-// SetLocked sets the "locked" field.
-func (m *GeneralMutation) SetLocked(d decimal.Decimal) {
-	m.locked = &d
-	m.addlocked = nil
+// SetToPlatform sets the "to_platform" field.
+func (m *ProfitGeneralMutation) SetToPlatform(d decimal.Decimal) {
+	m.to_platform = &d
+	m.addto_platform = nil
 }
 
-// Locked returns the value of the "locked" field in the mutation.
-func (m *GeneralMutation) Locked() (r decimal.Decimal, exists bool) {
-	v := m.locked
+// ToPlatform returns the value of the "to_platform" field in the mutation.
+func (m *ProfitGeneralMutation) ToPlatform() (r decimal.Decimal, exists bool) {
+	v := m.to_platform
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLocked returns the old "locked" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldToPlatform returns the old "to_platform" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldLocked(ctx context.Context) (v decimal.Decimal, err error) {
+func (m *ProfitGeneralMutation) OldToPlatform(ctx context.Context) (v decimal.Decimal, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLocked is only allowed on UpdateOne operations")
+		return v, errors.New("OldToPlatform is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLocked requires an ID field in the mutation")
+		return v, errors.New("OldToPlatform requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLocked: %w", err)
+		return v, fmt.Errorf("querying old value for OldToPlatform: %w", err)
 	}
-	return oldValue.Locked, nil
+	return oldValue.ToPlatform, nil
 }
 
-// AddLocked adds d to the "locked" field.
-func (m *GeneralMutation) AddLocked(d decimal.Decimal) {
-	if m.addlocked != nil {
-		*m.addlocked = m.addlocked.Add(d)
+// AddToPlatform adds d to the "to_platform" field.
+func (m *ProfitGeneralMutation) AddToPlatform(d decimal.Decimal) {
+	if m.addto_platform != nil {
+		*m.addto_platform = m.addto_platform.Add(d)
 	} else {
-		m.addlocked = &d
+		m.addto_platform = &d
 	}
 }
 
-// AddedLocked returns the value that was added to the "locked" field in this mutation.
-func (m *GeneralMutation) AddedLocked() (r decimal.Decimal, exists bool) {
-	v := m.addlocked
+// AddedToPlatform returns the value that was added to the "to_platform" field in this mutation.
+func (m *ProfitGeneralMutation) AddedToPlatform() (r decimal.Decimal, exists bool) {
+	v := m.addto_platform
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearLocked clears the value of the "locked" field.
-func (m *GeneralMutation) ClearLocked() {
-	m.locked = nil
-	m.addlocked = nil
-	m.clearedFields[general.FieldLocked] = struct{}{}
+// ClearToPlatform clears the value of the "to_platform" field.
+func (m *ProfitGeneralMutation) ClearToPlatform() {
+	m.to_platform = nil
+	m.addto_platform = nil
+	m.clearedFields[profitgeneral.FieldToPlatform] = struct{}{}
 }
 
-// LockedCleared returns if the "locked" field was cleared in this mutation.
-func (m *GeneralMutation) LockedCleared() bool {
-	_, ok := m.clearedFields[general.FieldLocked]
+// ToPlatformCleared returns if the "to_platform" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) ToPlatformCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldToPlatform]
 	return ok
 }
 
-// ResetLocked resets all changes to the "locked" field.
-func (m *GeneralMutation) ResetLocked() {
-	m.locked = nil
-	m.addlocked = nil
-	delete(m.clearedFields, general.FieldLocked)
+// ResetToPlatform resets all changes to the "to_platform" field.
+func (m *ProfitGeneralMutation) ResetToPlatform() {
+	m.to_platform = nil
+	m.addto_platform = nil
+	delete(m.clearedFields, profitgeneral.FieldToPlatform)
 }
 
-// SetOutcoming sets the "outcoming" field.
-func (m *GeneralMutation) SetOutcoming(d decimal.Decimal) {
-	m.outcoming = &d
-	m.addoutcoming = nil
+// SetToUser sets the "to_user" field.
+func (m *ProfitGeneralMutation) SetToUser(d decimal.Decimal) {
+	m.to_user = &d
+	m.addto_user = nil
 }
 
-// Outcoming returns the value of the "outcoming" field in the mutation.
-func (m *GeneralMutation) Outcoming() (r decimal.Decimal, exists bool) {
-	v := m.outcoming
+// ToUser returns the value of the "to_user" field in the mutation.
+func (m *ProfitGeneralMutation) ToUser() (r decimal.Decimal, exists bool) {
+	v := m.to_user
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOutcoming returns the old "outcoming" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
+// OldToUser returns the old "to_user" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldOutcoming(ctx context.Context) (v decimal.Decimal, err error) {
+func (m *ProfitGeneralMutation) OldToUser(ctx context.Context) (v decimal.Decimal, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOutcoming is only allowed on UpdateOne operations")
+		return v, errors.New("OldToUser is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOutcoming requires an ID field in the mutation")
+		return v, errors.New("OldToUser requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOutcoming: %w", err)
+		return v, fmt.Errorf("querying old value for OldToUser: %w", err)
 	}
-	return oldValue.Outcoming, nil
+	return oldValue.ToUser, nil
 }
 
-// AddOutcoming adds d to the "outcoming" field.
-func (m *GeneralMutation) AddOutcoming(d decimal.Decimal) {
-	if m.addoutcoming != nil {
-		*m.addoutcoming = m.addoutcoming.Add(d)
+// AddToUser adds d to the "to_user" field.
+func (m *ProfitGeneralMutation) AddToUser(d decimal.Decimal) {
+	if m.addto_user != nil {
+		*m.addto_user = m.addto_user.Add(d)
 	} else {
-		m.addoutcoming = &d
+		m.addto_user = &d
 	}
 }
 
-// AddedOutcoming returns the value that was added to the "outcoming" field in this mutation.
-func (m *GeneralMutation) AddedOutcoming() (r decimal.Decimal, exists bool) {
-	v := m.addoutcoming
+// AddedToUser returns the value that was added to the "to_user" field in this mutation.
+func (m *ProfitGeneralMutation) AddedToUser() (r decimal.Decimal, exists bool) {
+	v := m.addto_user
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearOutcoming clears the value of the "outcoming" field.
-func (m *GeneralMutation) ClearOutcoming() {
-	m.outcoming = nil
-	m.addoutcoming = nil
-	m.clearedFields[general.FieldOutcoming] = struct{}{}
+// ClearToUser clears the value of the "to_user" field.
+func (m *ProfitGeneralMutation) ClearToUser() {
+	m.to_user = nil
+	m.addto_user = nil
+	m.clearedFields[profitgeneral.FieldToUser] = struct{}{}
 }
 
-// OutcomingCleared returns if the "outcoming" field was cleared in this mutation.
-func (m *GeneralMutation) OutcomingCleared() bool {
-	_, ok := m.clearedFields[general.FieldOutcoming]
+// ToUserCleared returns if the "to_user" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) ToUserCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldToUser]
 	return ok
 }
 
-// ResetOutcoming resets all changes to the "outcoming" field.
-func (m *GeneralMutation) ResetOutcoming() {
-	m.outcoming = nil
-	m.addoutcoming = nil
-	delete(m.clearedFields, general.FieldOutcoming)
+// ResetToUser resets all changes to the "to_user" field.
+func (m *ProfitGeneralMutation) ResetToUser() {
+	m.to_user = nil
+	m.addto_user = nil
+	delete(m.clearedFields, profitgeneral.FieldToUser)
 }
 
-// SetSpendable sets the "spendable" field.
-func (m *GeneralMutation) SetSpendable(d decimal.Decimal) {
-	m.spendable = &d
-	m.addspendable = nil
-}
-
-// Spendable returns the value of the "spendable" field in the mutation.
-func (m *GeneralMutation) Spendable() (r decimal.Decimal, exists bool) {
-	v := m.spendable
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSpendable returns the old "spendable" field's value of the General entity.
-// If the General object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GeneralMutation) OldSpendable(ctx context.Context) (v decimal.Decimal, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSpendable is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSpendable requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSpendable: %w", err)
-	}
-	return oldValue.Spendable, nil
-}
-
-// AddSpendable adds d to the "spendable" field.
-func (m *GeneralMutation) AddSpendable(d decimal.Decimal) {
-	if m.addspendable != nil {
-		*m.addspendable = m.addspendable.Add(d)
-	} else {
-		m.addspendable = &d
-	}
-}
-
-// AddedSpendable returns the value that was added to the "spendable" field in this mutation.
-func (m *GeneralMutation) AddedSpendable() (r decimal.Decimal, exists bool) {
-	v := m.addspendable
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearSpendable clears the value of the "spendable" field.
-func (m *GeneralMutation) ClearSpendable() {
-	m.spendable = nil
-	m.addspendable = nil
-	m.clearedFields[general.FieldSpendable] = struct{}{}
-}
-
-// SpendableCleared returns if the "spendable" field was cleared in this mutation.
-func (m *GeneralMutation) SpendableCleared() bool {
-	_, ok := m.clearedFields[general.FieldSpendable]
-	return ok
-}
-
-// ResetSpendable resets all changes to the "spendable" field.
-func (m *GeneralMutation) ResetSpendable() {
-	m.spendable = nil
-	m.addspendable = nil
-	delete(m.clearedFields, general.FieldSpendable)
-}
-
-// Where appends a list predicates to the GeneralMutation builder.
-func (m *GeneralMutation) Where(ps ...predicate.General) {
+// Where appends a list predicates to the ProfitGeneralMutation builder.
+func (m *ProfitGeneralMutation) Where(ps ...predicate.ProfitGeneral) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *GeneralMutation) Op() Op {
+func (m *ProfitGeneralMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (General).
-func (m *GeneralMutation) Type() string {
+// Type returns the node type of this mutation (ProfitGeneral).
+func (m *ProfitGeneralMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *GeneralMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+func (m *ProfitGeneralMutation) Fields() []string {
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
-		fields = append(fields, general.FieldCreatedAt)
+		fields = append(fields, profitgeneral.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, general.FieldUpdatedAt)
+		fields = append(fields, profitgeneral.FieldUpdatedAt)
 	}
 	if m.deleted_at != nil {
-		fields = append(fields, general.FieldDeletedAt)
+		fields = append(fields, profitgeneral.FieldDeletedAt)
 	}
-	if m.app_id != nil {
-		fields = append(fields, general.FieldAppID)
-	}
-	if m.user_id != nil {
-		fields = append(fields, general.FieldUserID)
+	if m.good_id != nil {
+		fields = append(fields, profitgeneral.FieldGoodID)
 	}
 	if m.coin_type_id != nil {
-		fields = append(fields, general.FieldCoinTypeID)
+		fields = append(fields, profitgeneral.FieldCoinTypeID)
 	}
-	if m.incoming != nil {
-		fields = append(fields, general.FieldIncoming)
+	if m.amount != nil {
+		fields = append(fields, profitgeneral.FieldAmount)
 	}
-	if m.locked != nil {
-		fields = append(fields, general.FieldLocked)
+	if m.to_platform != nil {
+		fields = append(fields, profitgeneral.FieldToPlatform)
 	}
-	if m.outcoming != nil {
-		fields = append(fields, general.FieldOutcoming)
-	}
-	if m.spendable != nil {
-		fields = append(fields, general.FieldSpendable)
+	if m.to_user != nil {
+		fields = append(fields, profitgeneral.FieldToUser)
 	}
 	return fields
 }
@@ -2142,28 +1578,24 @@ func (m *GeneralMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *GeneralMutation) Field(name string) (ent.Value, bool) {
+func (m *ProfitGeneralMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		return m.CreatedAt()
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		return m.DeletedAt()
-	case general.FieldAppID:
-		return m.AppID()
-	case general.FieldUserID:
-		return m.UserID()
-	case general.FieldCoinTypeID:
+	case profitgeneral.FieldGoodID:
+		return m.GoodID()
+	case profitgeneral.FieldCoinTypeID:
 		return m.CoinTypeID()
-	case general.FieldIncoming:
-		return m.Incoming()
-	case general.FieldLocked:
-		return m.Locked()
-	case general.FieldOutcoming:
-		return m.Outcoming()
-	case general.FieldSpendable:
-		return m.Spendable()
+	case profitgeneral.FieldAmount:
+		return m.Amount()
+	case profitgeneral.FieldToPlatform:
+		return m.ToPlatform()
+	case profitgeneral.FieldToUser:
+		return m.ToUser()
 	}
 	return nil, false
 }
@@ -2171,135 +1603,114 @@ func (m *GeneralMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *GeneralMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *ProfitGeneralMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case general.FieldAppID:
-		return m.OldAppID(ctx)
-	case general.FieldUserID:
-		return m.OldUserID(ctx)
-	case general.FieldCoinTypeID:
+	case profitgeneral.FieldGoodID:
+		return m.OldGoodID(ctx)
+	case profitgeneral.FieldCoinTypeID:
 		return m.OldCoinTypeID(ctx)
-	case general.FieldIncoming:
-		return m.OldIncoming(ctx)
-	case general.FieldLocked:
-		return m.OldLocked(ctx)
-	case general.FieldOutcoming:
-		return m.OldOutcoming(ctx)
-	case general.FieldSpendable:
-		return m.OldSpendable(ctx)
+	case profitgeneral.FieldAmount:
+		return m.OldAmount(ctx)
+	case profitgeneral.FieldToPlatform:
+		return m.OldToPlatform(ctx)
+	case profitgeneral.FieldToUser:
+		return m.OldToUser(ctx)
 	}
-	return nil, fmt.Errorf("unknown General field %s", name)
+	return nil, fmt.Errorf("unknown ProfitGeneral field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *GeneralMutation) SetField(name string, value ent.Value) error {
+func (m *ProfitGeneralMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case general.FieldAppID:
+	case profitgeneral.FieldGoodID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAppID(v)
+		m.SetGoodID(v)
 		return nil
-	case general.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case general.FieldCoinTypeID:
+	case profitgeneral.FieldCoinTypeID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCoinTypeID(v)
 		return nil
-	case general.FieldIncoming:
+	case profitgeneral.FieldAmount:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIncoming(v)
+		m.SetAmount(v)
 		return nil
-	case general.FieldLocked:
+	case profitgeneral.FieldToPlatform:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLocked(v)
+		m.SetToPlatform(v)
 		return nil
-	case general.FieldOutcoming:
+	case profitgeneral.FieldToUser:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOutcoming(v)
-		return nil
-	case general.FieldSpendable:
-		v, ok := value.(decimal.Decimal)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSpendable(v)
+		m.SetToUser(v)
 		return nil
 	}
-	return fmt.Errorf("unknown General field %s", name)
+	return fmt.Errorf("unknown ProfitGeneral field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *GeneralMutation) AddedFields() []string {
+func (m *ProfitGeneralMutation) AddedFields() []string {
 	var fields []string
 	if m.addcreated_at != nil {
-		fields = append(fields, general.FieldCreatedAt)
+		fields = append(fields, profitgeneral.FieldCreatedAt)
 	}
 	if m.addupdated_at != nil {
-		fields = append(fields, general.FieldUpdatedAt)
+		fields = append(fields, profitgeneral.FieldUpdatedAt)
 	}
 	if m.adddeleted_at != nil {
-		fields = append(fields, general.FieldDeletedAt)
+		fields = append(fields, profitgeneral.FieldDeletedAt)
 	}
-	if m.addincoming != nil {
-		fields = append(fields, general.FieldIncoming)
+	if m.addamount != nil {
+		fields = append(fields, profitgeneral.FieldAmount)
 	}
-	if m.addlocked != nil {
-		fields = append(fields, general.FieldLocked)
+	if m.addto_platform != nil {
+		fields = append(fields, profitgeneral.FieldToPlatform)
 	}
-	if m.addoutcoming != nil {
-		fields = append(fields, general.FieldOutcoming)
-	}
-	if m.addspendable != nil {
-		fields = append(fields, general.FieldSpendable)
+	if m.addto_user != nil {
+		fields = append(fields, profitgeneral.FieldToUser)
 	}
 	return fields
 }
@@ -2307,22 +1718,20 @@ func (m *GeneralMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *GeneralMutation) AddedField(name string) (ent.Value, bool) {
+func (m *ProfitGeneralMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		return m.AddedCreatedAt()
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		return m.AddedUpdatedAt()
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		return m.AddedDeletedAt()
-	case general.FieldIncoming:
-		return m.AddedIncoming()
-	case general.FieldLocked:
-		return m.AddedLocked()
-	case general.FieldOutcoming:
-		return m.AddedOutcoming()
-	case general.FieldSpendable:
-		return m.AddedSpendable()
+	case profitgeneral.FieldAmount:
+		return m.AddedAmount()
+	case profitgeneral.FieldToPlatform:
+		return m.AddedToPlatform()
+	case profitgeneral.FieldToUser:
+		return m.AddedToUser()
 	}
 	return nil, false
 }
@@ -2330,207 +1739,1072 @@ func (m *GeneralMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *GeneralMutation) AddField(name string, value ent.Value) error {
+func (m *ProfitGeneralMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCreatedAt(v)
 		return nil
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedAt(v)
 		return nil
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDeletedAt(v)
 		return nil
-	case general.FieldIncoming:
+	case profitgeneral.FieldAmount:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddIncoming(v)
+		m.AddAmount(v)
 		return nil
-	case general.FieldLocked:
+	case profitgeneral.FieldToPlatform:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLocked(v)
+		m.AddToPlatform(v)
 		return nil
-	case general.FieldOutcoming:
+	case profitgeneral.FieldToUser:
 		v, ok := value.(decimal.Decimal)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOutcoming(v)
-		return nil
-	case general.FieldSpendable:
-		v, ok := value.(decimal.Decimal)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSpendable(v)
+		m.AddToUser(v)
 		return nil
 	}
-	return fmt.Errorf("unknown General numeric field %s", name)
+	return fmt.Errorf("unknown ProfitGeneral numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *GeneralMutation) ClearedFields() []string {
+func (m *ProfitGeneralMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(general.FieldAppID) {
-		fields = append(fields, general.FieldAppID)
+	if m.FieldCleared(profitgeneral.FieldGoodID) {
+		fields = append(fields, profitgeneral.FieldGoodID)
 	}
-	if m.FieldCleared(general.FieldUserID) {
-		fields = append(fields, general.FieldUserID)
+	if m.FieldCleared(profitgeneral.FieldCoinTypeID) {
+		fields = append(fields, profitgeneral.FieldCoinTypeID)
 	}
-	if m.FieldCleared(general.FieldCoinTypeID) {
-		fields = append(fields, general.FieldCoinTypeID)
+	if m.FieldCleared(profitgeneral.FieldAmount) {
+		fields = append(fields, profitgeneral.FieldAmount)
 	}
-	if m.FieldCleared(general.FieldIncoming) {
-		fields = append(fields, general.FieldIncoming)
+	if m.FieldCleared(profitgeneral.FieldToPlatform) {
+		fields = append(fields, profitgeneral.FieldToPlatform)
 	}
-	if m.FieldCleared(general.FieldLocked) {
-		fields = append(fields, general.FieldLocked)
-	}
-	if m.FieldCleared(general.FieldOutcoming) {
-		fields = append(fields, general.FieldOutcoming)
-	}
-	if m.FieldCleared(general.FieldSpendable) {
-		fields = append(fields, general.FieldSpendable)
+	if m.FieldCleared(profitgeneral.FieldToUser) {
+		fields = append(fields, profitgeneral.FieldToUser)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *GeneralMutation) FieldCleared(name string) bool {
+func (m *ProfitGeneralMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *GeneralMutation) ClearField(name string) error {
+func (m *ProfitGeneralMutation) ClearField(name string) error {
 	switch name {
-	case general.FieldAppID:
-		m.ClearAppID()
+	case profitgeneral.FieldGoodID:
+		m.ClearGoodID()
 		return nil
-	case general.FieldUserID:
-		m.ClearUserID()
-		return nil
-	case general.FieldCoinTypeID:
+	case profitgeneral.FieldCoinTypeID:
 		m.ClearCoinTypeID()
 		return nil
-	case general.FieldIncoming:
-		m.ClearIncoming()
+	case profitgeneral.FieldAmount:
+		m.ClearAmount()
 		return nil
-	case general.FieldLocked:
-		m.ClearLocked()
+	case profitgeneral.FieldToPlatform:
+		m.ClearToPlatform()
 		return nil
-	case general.FieldOutcoming:
-		m.ClearOutcoming()
-		return nil
-	case general.FieldSpendable:
-		m.ClearSpendable()
+	case profitgeneral.FieldToUser:
+		m.ClearToUser()
 		return nil
 	}
-	return fmt.Errorf("unknown General nullable field %s", name)
+	return fmt.Errorf("unknown ProfitGeneral nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *GeneralMutation) ResetField(name string) error {
+func (m *ProfitGeneralMutation) ResetField(name string) error {
 	switch name {
-	case general.FieldCreatedAt:
+	case profitgeneral.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case general.FieldUpdatedAt:
+	case profitgeneral.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case general.FieldDeletedAt:
+	case profitgeneral.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case general.FieldAppID:
-		m.ResetAppID()
+	case profitgeneral.FieldGoodID:
+		m.ResetGoodID()
 		return nil
-	case general.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case general.FieldCoinTypeID:
+	case profitgeneral.FieldCoinTypeID:
 		m.ResetCoinTypeID()
 		return nil
-	case general.FieldIncoming:
-		m.ResetIncoming()
+	case profitgeneral.FieldAmount:
+		m.ResetAmount()
 		return nil
-	case general.FieldLocked:
-		m.ResetLocked()
+	case profitgeneral.FieldToPlatform:
+		m.ResetToPlatform()
 		return nil
-	case general.FieldOutcoming:
-		m.ResetOutcoming()
-		return nil
-	case general.FieldSpendable:
-		m.ResetSpendable()
+	case profitgeneral.FieldToUser:
+		m.ResetToUser()
 		return nil
 	}
-	return fmt.Errorf("unknown General field %s", name)
+	return fmt.Errorf("unknown ProfitGeneral field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *GeneralMutation) AddedEdges() []string {
+func (m *ProfitGeneralMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *GeneralMutation) AddedIDs(name string) []ent.Value {
+func (m *ProfitGeneralMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *GeneralMutation) RemovedEdges() []string {
+func (m *ProfitGeneralMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *GeneralMutation) RemovedIDs(name string) []ent.Value {
+func (m *ProfitGeneralMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *GeneralMutation) ClearedEdges() []string {
+func (m *ProfitGeneralMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *GeneralMutation) EdgeCleared(name string) bool {
+func (m *ProfitGeneralMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *GeneralMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown General unique edge %s", name)
+func (m *ProfitGeneralMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ProfitGeneral unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *GeneralMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown General edge %s", name)
+func (m *ProfitGeneralMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ProfitGeneral edge %s", name)
+}
+
+// ProfitUnsoldMutation represents an operation that mutates the ProfitUnsold nodes in the graph.
+type ProfitUnsoldMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *uint32
+	addcreated_at   *int32
+	updated_at      *uint32
+	addupdated_at   *int32
+	deleted_at      *uint32
+	adddeleted_at   *int32
+	good_id         *uuid.UUID
+	coin_type_id    *uuid.UUID
+	amount          *decimal.Decimal
+	addamount       *decimal.Decimal
+	benefit_date    *uint32
+	addbenefit_date *int32
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*ProfitUnsold, error)
+	predicates      []predicate.ProfitUnsold
+}
+
+var _ ent.Mutation = (*ProfitUnsoldMutation)(nil)
+
+// profitunsoldOption allows management of the mutation configuration using functional options.
+type profitunsoldOption func(*ProfitUnsoldMutation)
+
+// newProfitUnsoldMutation creates new mutation for the ProfitUnsold entity.
+func newProfitUnsoldMutation(c config, op Op, opts ...profitunsoldOption) *ProfitUnsoldMutation {
+	m := &ProfitUnsoldMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeProfitUnsold,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withProfitUnsoldID sets the ID field of the mutation.
+func withProfitUnsoldID(id uuid.UUID) profitunsoldOption {
+	return func(m *ProfitUnsoldMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ProfitUnsold
+		)
+		m.oldValue = func(ctx context.Context) (*ProfitUnsold, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ProfitUnsold.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withProfitUnsold sets the old ProfitUnsold of the mutation.
+func withProfitUnsold(node *ProfitUnsold) profitunsoldOption {
+	return func(m *ProfitUnsoldMutation) {
+		m.oldValue = func(context.Context) (*ProfitUnsold, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ProfitUnsoldMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ProfitUnsoldMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ProfitUnsold entities.
+func (m *ProfitUnsoldMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ProfitUnsoldMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ProfitUnsoldMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ProfitUnsold.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ProfitUnsoldMutation) SetCreatedAt(u uint32) {
+	m.created_at = &u
+	m.addcreated_at = nil
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ProfitUnsoldMutation) CreatedAt() (r uint32, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// AddCreatedAt adds u to the "created_at" field.
+func (m *ProfitUnsoldMutation) AddCreatedAt(u int32) {
+	if m.addcreated_at != nil {
+		*m.addcreated_at += u
+	} else {
+		m.addcreated_at = &u
+	}
+}
+
+// AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
+func (m *ProfitUnsoldMutation) AddedCreatedAt() (r int32, exists bool) {
+	v := m.addcreated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ProfitUnsoldMutation) ResetCreatedAt() {
+	m.created_at = nil
+	m.addcreated_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ProfitUnsoldMutation) SetUpdatedAt(u uint32) {
+	m.updated_at = &u
+	m.addupdated_at = nil
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ProfitUnsoldMutation) UpdatedAt() (r uint32, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// AddUpdatedAt adds u to the "updated_at" field.
+func (m *ProfitUnsoldMutation) AddUpdatedAt(u int32) {
+	if m.addupdated_at != nil {
+		*m.addupdated_at += u
+	} else {
+		m.addupdated_at = &u
+	}
+}
+
+// AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
+func (m *ProfitUnsoldMutation) AddedUpdatedAt() (r int32, exists bool) {
+	v := m.addupdated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ProfitUnsoldMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	m.addupdated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *ProfitUnsoldMutation) SetDeletedAt(u uint32) {
+	m.deleted_at = &u
+	m.adddeleted_at = nil
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *ProfitUnsoldMutation) DeletedAt() (r uint32, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// AddDeletedAt adds u to the "deleted_at" field.
+func (m *ProfitUnsoldMutation) AddDeletedAt(u int32) {
+	if m.adddeleted_at != nil {
+		*m.adddeleted_at += u
+	} else {
+		m.adddeleted_at = &u
+	}
+}
+
+// AddedDeletedAt returns the value that was added to the "deleted_at" field in this mutation.
+func (m *ProfitUnsoldMutation) AddedDeletedAt() (r int32, exists bool) {
+	v := m.adddeleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *ProfitUnsoldMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	m.adddeleted_at = nil
+}
+
+// SetGoodID sets the "good_id" field.
+func (m *ProfitUnsoldMutation) SetGoodID(u uuid.UUID) {
+	m.good_id = &u
+}
+
+// GoodID returns the value of the "good_id" field in the mutation.
+func (m *ProfitUnsoldMutation) GoodID() (r uuid.UUID, exists bool) {
+	v := m.good_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoodID returns the old "good_id" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldGoodID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoodID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoodID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoodID: %w", err)
+	}
+	return oldValue.GoodID, nil
+}
+
+// ClearGoodID clears the value of the "good_id" field.
+func (m *ProfitUnsoldMutation) ClearGoodID() {
+	m.good_id = nil
+	m.clearedFields[profitunsold.FieldGoodID] = struct{}{}
+}
+
+// GoodIDCleared returns if the "good_id" field was cleared in this mutation.
+func (m *ProfitUnsoldMutation) GoodIDCleared() bool {
+	_, ok := m.clearedFields[profitunsold.FieldGoodID]
+	return ok
+}
+
+// ResetGoodID resets all changes to the "good_id" field.
+func (m *ProfitUnsoldMutation) ResetGoodID() {
+	m.good_id = nil
+	delete(m.clearedFields, profitunsold.FieldGoodID)
+}
+
+// SetCoinTypeID sets the "coin_type_id" field.
+func (m *ProfitUnsoldMutation) SetCoinTypeID(u uuid.UUID) {
+	m.coin_type_id = &u
+}
+
+// CoinTypeID returns the value of the "coin_type_id" field in the mutation.
+func (m *ProfitUnsoldMutation) CoinTypeID() (r uuid.UUID, exists bool) {
+	v := m.coin_type_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoinTypeID returns the old "coin_type_id" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoinTypeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoinTypeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoinTypeID: %w", err)
+	}
+	return oldValue.CoinTypeID, nil
+}
+
+// ClearCoinTypeID clears the value of the "coin_type_id" field.
+func (m *ProfitUnsoldMutation) ClearCoinTypeID() {
+	m.coin_type_id = nil
+	m.clearedFields[profitunsold.FieldCoinTypeID] = struct{}{}
+}
+
+// CoinTypeIDCleared returns if the "coin_type_id" field was cleared in this mutation.
+func (m *ProfitUnsoldMutation) CoinTypeIDCleared() bool {
+	_, ok := m.clearedFields[profitunsold.FieldCoinTypeID]
+	return ok
+}
+
+// ResetCoinTypeID resets all changes to the "coin_type_id" field.
+func (m *ProfitUnsoldMutation) ResetCoinTypeID() {
+	m.coin_type_id = nil
+	delete(m.clearedFields, profitunsold.FieldCoinTypeID)
+}
+
+// SetAmount sets the "amount" field.
+func (m *ProfitUnsoldMutation) SetAmount(d decimal.Decimal) {
+	m.amount = &d
+	m.addamount = nil
+}
+
+// Amount returns the value of the "amount" field in the mutation.
+func (m *ProfitUnsoldMutation) Amount() (r decimal.Decimal, exists bool) {
+	v := m.amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmount returns the old "amount" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldAmount(ctx context.Context) (v decimal.Decimal, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
+	}
+	return oldValue.Amount, nil
+}
+
+// AddAmount adds d to the "amount" field.
+func (m *ProfitUnsoldMutation) AddAmount(d decimal.Decimal) {
+	if m.addamount != nil {
+		*m.addamount = m.addamount.Add(d)
+	} else {
+		m.addamount = &d
+	}
+}
+
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *ProfitUnsoldMutation) AddedAmount() (r decimal.Decimal, exists bool) {
+	v := m.addamount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAmount clears the value of the "amount" field.
+func (m *ProfitUnsoldMutation) ClearAmount() {
+	m.amount = nil
+	m.addamount = nil
+	m.clearedFields[profitunsold.FieldAmount] = struct{}{}
+}
+
+// AmountCleared returns if the "amount" field was cleared in this mutation.
+func (m *ProfitUnsoldMutation) AmountCleared() bool {
+	_, ok := m.clearedFields[profitunsold.FieldAmount]
+	return ok
+}
+
+// ResetAmount resets all changes to the "amount" field.
+func (m *ProfitUnsoldMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+	delete(m.clearedFields, profitunsold.FieldAmount)
+}
+
+// SetBenefitDate sets the "benefit_date" field.
+func (m *ProfitUnsoldMutation) SetBenefitDate(u uint32) {
+	m.benefit_date = &u
+	m.addbenefit_date = nil
+}
+
+// BenefitDate returns the value of the "benefit_date" field in the mutation.
+func (m *ProfitUnsoldMutation) BenefitDate() (r uint32, exists bool) {
+	v := m.benefit_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBenefitDate returns the old "benefit_date" field's value of the ProfitUnsold entity.
+// If the ProfitUnsold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitUnsoldMutation) OldBenefitDate(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBenefitDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBenefitDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBenefitDate: %w", err)
+	}
+	return oldValue.BenefitDate, nil
+}
+
+// AddBenefitDate adds u to the "benefit_date" field.
+func (m *ProfitUnsoldMutation) AddBenefitDate(u int32) {
+	if m.addbenefit_date != nil {
+		*m.addbenefit_date += u
+	} else {
+		m.addbenefit_date = &u
+	}
+}
+
+// AddedBenefitDate returns the value that was added to the "benefit_date" field in this mutation.
+func (m *ProfitUnsoldMutation) AddedBenefitDate() (r int32, exists bool) {
+	v := m.addbenefit_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearBenefitDate clears the value of the "benefit_date" field.
+func (m *ProfitUnsoldMutation) ClearBenefitDate() {
+	m.benefit_date = nil
+	m.addbenefit_date = nil
+	m.clearedFields[profitunsold.FieldBenefitDate] = struct{}{}
+}
+
+// BenefitDateCleared returns if the "benefit_date" field was cleared in this mutation.
+func (m *ProfitUnsoldMutation) BenefitDateCleared() bool {
+	_, ok := m.clearedFields[profitunsold.FieldBenefitDate]
+	return ok
+}
+
+// ResetBenefitDate resets all changes to the "benefit_date" field.
+func (m *ProfitUnsoldMutation) ResetBenefitDate() {
+	m.benefit_date = nil
+	m.addbenefit_date = nil
+	delete(m.clearedFields, profitunsold.FieldBenefitDate)
+}
+
+// Where appends a list predicates to the ProfitUnsoldMutation builder.
+func (m *ProfitUnsoldMutation) Where(ps ...predicate.ProfitUnsold) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *ProfitUnsoldMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (ProfitUnsold).
+func (m *ProfitUnsoldMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ProfitUnsoldMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, profitunsold.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, profitunsold.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, profitunsold.FieldDeletedAt)
+	}
+	if m.good_id != nil {
+		fields = append(fields, profitunsold.FieldGoodID)
+	}
+	if m.coin_type_id != nil {
+		fields = append(fields, profitunsold.FieldCoinTypeID)
+	}
+	if m.amount != nil {
+		fields = append(fields, profitunsold.FieldAmount)
+	}
+	if m.benefit_date != nil {
+		fields = append(fields, profitunsold.FieldBenefitDate)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ProfitUnsoldMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		return m.CreatedAt()
+	case profitunsold.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case profitunsold.FieldDeletedAt:
+		return m.DeletedAt()
+	case profitunsold.FieldGoodID:
+		return m.GoodID()
+	case profitunsold.FieldCoinTypeID:
+		return m.CoinTypeID()
+	case profitunsold.FieldAmount:
+		return m.Amount()
+	case profitunsold.FieldBenefitDate:
+		return m.BenefitDate()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ProfitUnsoldMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case profitunsold.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case profitunsold.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case profitunsold.FieldGoodID:
+		return m.OldGoodID(ctx)
+	case profitunsold.FieldCoinTypeID:
+		return m.OldCoinTypeID(ctx)
+	case profitunsold.FieldAmount:
+		return m.OldAmount(ctx)
+	case profitunsold.FieldBenefitDate:
+		return m.OldBenefitDate(ctx)
+	}
+	return nil, fmt.Errorf("unknown ProfitUnsold field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProfitUnsoldMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case profitunsold.FieldUpdatedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case profitunsold.FieldDeletedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case profitunsold.FieldGoodID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoodID(v)
+		return nil
+	case profitunsold.FieldCoinTypeID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoinTypeID(v)
+		return nil
+	case profitunsold.FieldAmount:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmount(v)
+		return nil
+	case profitunsold.FieldBenefitDate:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBenefitDate(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ProfitUnsold field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ProfitUnsoldMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_at != nil {
+		fields = append(fields, profitunsold.FieldCreatedAt)
+	}
+	if m.addupdated_at != nil {
+		fields = append(fields, profitunsold.FieldUpdatedAt)
+	}
+	if m.adddeleted_at != nil {
+		fields = append(fields, profitunsold.FieldDeletedAt)
+	}
+	if m.addamount != nil {
+		fields = append(fields, profitunsold.FieldAmount)
+	}
+	if m.addbenefit_date != nil {
+		fields = append(fields, profitunsold.FieldBenefitDate)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ProfitUnsoldMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		return m.AddedCreatedAt()
+	case profitunsold.FieldUpdatedAt:
+		return m.AddedUpdatedAt()
+	case profitunsold.FieldDeletedAt:
+		return m.AddedDeletedAt()
+	case profitunsold.FieldAmount:
+		return m.AddedAmount()
+	case profitunsold.FieldBenefitDate:
+		return m.AddedBenefitDate()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProfitUnsoldMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedAt(v)
+		return nil
+	case profitunsold.FieldUpdatedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedAt(v)
+		return nil
+	case profitunsold.FieldDeletedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeletedAt(v)
+		return nil
+	case profitunsold.FieldAmount:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmount(v)
+		return nil
+	case profitunsold.FieldBenefitDate:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBenefitDate(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ProfitUnsold numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ProfitUnsoldMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(profitunsold.FieldGoodID) {
+		fields = append(fields, profitunsold.FieldGoodID)
+	}
+	if m.FieldCleared(profitunsold.FieldCoinTypeID) {
+		fields = append(fields, profitunsold.FieldCoinTypeID)
+	}
+	if m.FieldCleared(profitunsold.FieldAmount) {
+		fields = append(fields, profitunsold.FieldAmount)
+	}
+	if m.FieldCleared(profitunsold.FieldBenefitDate) {
+		fields = append(fields, profitunsold.FieldBenefitDate)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ProfitUnsoldMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ProfitUnsoldMutation) ClearField(name string) error {
+	switch name {
+	case profitunsold.FieldGoodID:
+		m.ClearGoodID()
+		return nil
+	case profitunsold.FieldCoinTypeID:
+		m.ClearCoinTypeID()
+		return nil
+	case profitunsold.FieldAmount:
+		m.ClearAmount()
+		return nil
+	case profitunsold.FieldBenefitDate:
+		m.ClearBenefitDate()
+		return nil
+	}
+	return fmt.Errorf("unknown ProfitUnsold nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ProfitUnsoldMutation) ResetField(name string) error {
+	switch name {
+	case profitunsold.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case profitunsold.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case profitunsold.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case profitunsold.FieldGoodID:
+		m.ResetGoodID()
+		return nil
+	case profitunsold.FieldCoinTypeID:
+		m.ResetCoinTypeID()
+		return nil
+	case profitunsold.FieldAmount:
+		m.ResetAmount()
+		return nil
+	case profitunsold.FieldBenefitDate:
+		m.ResetBenefitDate()
+		return nil
+	}
+	return fmt.Errorf("unknown ProfitUnsold field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ProfitUnsoldMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ProfitUnsoldMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ProfitUnsoldMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ProfitUnsoldMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ProfitUnsoldMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ProfitUnsoldMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ProfitUnsoldMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ProfitUnsold unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ProfitUnsoldMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ProfitUnsold edge %s", name)
 }

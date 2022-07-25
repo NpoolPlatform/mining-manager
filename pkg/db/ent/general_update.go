@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/general"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/predicate"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/general"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/predicate"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )

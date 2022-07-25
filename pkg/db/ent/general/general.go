@@ -65,7 +65,7 @@ func ValidColumn(column string) bool {
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/NpoolPlatform/service-template/pkg/db/ent/runtime"
+//	import _ "github.com/NpoolPlatform/mining-manager/pkg/db/ent/runtime"
 //
 var (
 	Hooks  [1]ent.Hook

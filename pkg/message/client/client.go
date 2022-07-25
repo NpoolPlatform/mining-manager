@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	msgcli "github.com/NpoolPlatform/go-service-framework/pkg/rabbitmq/client"
-	constant "github.com/NpoolPlatform/service-template/pkg/message/const"
-	msg "github.com/NpoolPlatform/service-template/pkg/message/message"
+	constant "github.com/NpoolPlatform/mining-manager/pkg/message/const"
+	msg "github.com/NpoolPlatform/mining-manager/pkg/message/message"
 
 	"github.com/streadway/amqp"
 )

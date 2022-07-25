@@ -8,8 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/detail"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/general"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitdetail"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitunsold"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -30,8 +31,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		detail.Table:  detail.ValidColumn,
-		general.Table: general.ValidColumn,
+		profitdetail.Table:  profitdetail.ValidColumn,
+		profitgeneral.Table: profitgeneral.ValidColumn,
+		profitunsold.Table:  profitunsold.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

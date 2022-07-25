@@ -6,8 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Detail is the predicate function for detail builders.
-type Detail func(*sql.Selector)
+// ProfitDetail is the predicate function for profitdetail builders.
+type ProfitDetail func(*sql.Selector)
 
-// General is the predicate function for general builders.
-type General func(*sql.Selector)
+// ProfitGeneral is the predicate function for profitgeneral builders.
+type ProfitGeneral func(*sql.Selector)
+
+// ProfitUnsold is the predicate function for profitunsold builders.
+type ProfitUnsold func(*sql.Selector)

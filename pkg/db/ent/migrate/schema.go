@@ -8,53 +8,63 @@ import (
 )
 
 var (
-	// DetailsColumns holds the columns for the "details" table.
-	DetailsColumns = []*schema.Column{
+	// ProfitDetailsColumns holds the columns for the "profit_details" table.
+	ProfitDetailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
-		{Name: "app_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "io_type", Type: field.TypeString, Nullable: true, Default: "DefaultType"},
-		{Name: "io_sub_type", Type: field.TypeString, Nullable: true, Default: "DefaultSubType"},
 		{Name: "amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
-		{Name: "from_coin_type_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "coin_usd_currency", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
-		{Name: "io_extra", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "from_old_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "benefit_date", Type: field.TypeUint32, Nullable: true, Default: 0},
 	}
-	// DetailsTable holds the schema information for the "details" table.
-	DetailsTable = &schema.Table{
-		Name:       "details",
-		Columns:    DetailsColumns,
-		PrimaryKey: []*schema.Column{DetailsColumns[0]},
+	// ProfitDetailsTable holds the schema information for the "profit_details" table.
+	ProfitDetailsTable = &schema.Table{
+		Name:       "profit_details",
+		Columns:    ProfitDetailsColumns,
+		PrimaryKey: []*schema.Column{ProfitDetailsColumns[0]},
 	}
-	// GeneralsColumns holds the columns for the "generals" table.
-	GeneralsColumns = []*schema.Column{
+	// ProfitGeneralsColumns holds the columns for the "profit_generals" table.
+	ProfitGeneralsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
-		{Name: "app_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "incoming", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
-		{Name: "locked", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
-		{Name: "outcoming", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
-		{Name: "spendable", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "to_platform", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "to_user", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
 	}
-	// GeneralsTable holds the schema information for the "generals" table.
-	GeneralsTable = &schema.Table{
-		Name:       "generals",
-		Columns:    GeneralsColumns,
-		PrimaryKey: []*schema.Column{GeneralsColumns[0]},
+	// ProfitGeneralsTable holds the schema information for the "profit_generals" table.
+	ProfitGeneralsTable = &schema.Table{
+		Name:       "profit_generals",
+		Columns:    ProfitGeneralsColumns,
+		PrimaryKey: []*schema.Column{ProfitGeneralsColumns[0]},
+	}
+	// ProfitUnsoldsColumns holds the columns for the "profit_unsolds" table.
+	ProfitUnsoldsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeUint32},
+		{Name: "updated_at", Type: field.TypeUint32},
+		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "benefit_date", Type: field.TypeUint32, Nullable: true, Default: 0},
+	}
+	// ProfitUnsoldsTable holds the schema information for the "profit_unsolds" table.
+	ProfitUnsoldsTable = &schema.Table{
+		Name:       "profit_unsolds",
+		Columns:    ProfitUnsoldsColumns,
+		PrimaryKey: []*schema.Column{ProfitUnsoldsColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		DetailsTable,
-		GeneralsTable,
+		ProfitDetailsTable,
+		ProfitGeneralsTable,
+		ProfitUnsoldsTable,
 	}
 )
 

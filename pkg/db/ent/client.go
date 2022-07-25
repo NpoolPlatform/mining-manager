@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/migrate"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/migrate"
 	"github.com/google/uuid"
 
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/detail"
-	"github.com/NpoolPlatform/service-template/pkg/db/ent/general"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitdetail"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"
+	"github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitunsold"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -22,10 +23,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Detail is the client for interacting with the Detail builders.
-	Detail *DetailClient
-	// General is the client for interacting with the General builders.
-	General *GeneralClient
+	// ProfitDetail is the client for interacting with the ProfitDetail builders.
+	ProfitDetail *ProfitDetailClient
+	// ProfitGeneral is the client for interacting with the ProfitGeneral builders.
+	ProfitGeneral *ProfitGeneralClient
+	// ProfitUnsold is the client for interacting with the ProfitUnsold builders.
+	ProfitUnsold *ProfitUnsoldClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -39,8 +42,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Detail = NewDetailClient(c.config)
-	c.General = NewGeneralClient(c.config)
+	c.ProfitDetail = NewProfitDetailClient(c.config)
+	c.ProfitGeneral = NewProfitGeneralClient(c.config)
+	c.ProfitUnsold = NewProfitUnsoldClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -72,10 +76,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Detail:  NewDetailClient(cfg),
-		General: NewGeneralClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		ProfitDetail:  NewProfitDetailClient(cfg),
+		ProfitGeneral: NewProfitGeneralClient(cfg),
+		ProfitUnsold:  NewProfitUnsoldClient(cfg),
 	}, nil
 }
 
@@ -93,17 +98,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Detail:  NewDetailClient(cfg),
-		General: NewGeneralClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		ProfitDetail:  NewProfitDetailClient(cfg),
+		ProfitGeneral: NewProfitGeneralClient(cfg),
+		ProfitUnsold:  NewProfitUnsoldClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Detail.
+//		ProfitDetail.
 //		Query().
 //		Count(ctx)
 //
@@ -126,88 +132,89 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Detail.Use(hooks...)
-	c.General.Use(hooks...)
+	c.ProfitDetail.Use(hooks...)
+	c.ProfitGeneral.Use(hooks...)
+	c.ProfitUnsold.Use(hooks...)
 }
 
-// DetailClient is a client for the Detail schema.
-type DetailClient struct {
+// ProfitDetailClient is a client for the ProfitDetail schema.
+type ProfitDetailClient struct {
 	config
 }
 
-// NewDetailClient returns a client for the Detail from the given config.
-func NewDetailClient(c config) *DetailClient {
-	return &DetailClient{config: c}
+// NewProfitDetailClient returns a client for the ProfitDetail from the given config.
+func NewProfitDetailClient(c config) *ProfitDetailClient {
+	return &ProfitDetailClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `detail.Hooks(f(g(h())))`.
-func (c *DetailClient) Use(hooks ...Hook) {
-	c.hooks.Detail = append(c.hooks.Detail, hooks...)
+// A call to `Use(f, g, h)` equals to `profitdetail.Hooks(f(g(h())))`.
+func (c *ProfitDetailClient) Use(hooks ...Hook) {
+	c.hooks.ProfitDetail = append(c.hooks.ProfitDetail, hooks...)
 }
 
-// Create returns a create builder for Detail.
-func (c *DetailClient) Create() *DetailCreate {
-	mutation := newDetailMutation(c.config, OpCreate)
-	return &DetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for ProfitDetail.
+func (c *ProfitDetailClient) Create() *ProfitDetailCreate {
+	mutation := newProfitDetailMutation(c.config, OpCreate)
+	return &ProfitDetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Detail entities.
-func (c *DetailClient) CreateBulk(builders ...*DetailCreate) *DetailCreateBulk {
-	return &DetailCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of ProfitDetail entities.
+func (c *ProfitDetailClient) CreateBulk(builders ...*ProfitDetailCreate) *ProfitDetailCreateBulk {
+	return &ProfitDetailCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Detail.
-func (c *DetailClient) Update() *DetailUpdate {
-	mutation := newDetailMutation(c.config, OpUpdate)
-	return &DetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for ProfitDetail.
+func (c *ProfitDetailClient) Update() *ProfitDetailUpdate {
+	mutation := newProfitDetailMutation(c.config, OpUpdate)
+	return &ProfitDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DetailClient) UpdateOne(d *Detail) *DetailUpdateOne {
-	mutation := newDetailMutation(c.config, OpUpdateOne, withDetail(d))
-	return &DetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProfitDetailClient) UpdateOne(pd *ProfitDetail) *ProfitDetailUpdateOne {
+	mutation := newProfitDetailMutation(c.config, OpUpdateOne, withProfitDetail(pd))
+	return &ProfitDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DetailClient) UpdateOneID(id uuid.UUID) *DetailUpdateOne {
-	mutation := newDetailMutation(c.config, OpUpdateOne, withDetailID(id))
-	return &DetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProfitDetailClient) UpdateOneID(id uuid.UUID) *ProfitDetailUpdateOne {
+	mutation := newProfitDetailMutation(c.config, OpUpdateOne, withProfitDetailID(id))
+	return &ProfitDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Detail.
-func (c *DetailClient) Delete() *DetailDelete {
-	mutation := newDetailMutation(c.config, OpDelete)
-	return &DetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for ProfitDetail.
+func (c *ProfitDetailClient) Delete() *ProfitDetailDelete {
+	mutation := newProfitDetailMutation(c.config, OpDelete)
+	return &ProfitDetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *DetailClient) DeleteOne(d *Detail) *DetailDeleteOne {
-	return c.DeleteOneID(d.ID)
+func (c *ProfitDetailClient) DeleteOne(pd *ProfitDetail) *ProfitDetailDeleteOne {
+	return c.DeleteOneID(pd.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *DetailClient) DeleteOneID(id uuid.UUID) *DetailDeleteOne {
-	builder := c.Delete().Where(detail.ID(id))
+func (c *ProfitDetailClient) DeleteOneID(id uuid.UUID) *ProfitDetailDeleteOne {
+	builder := c.Delete().Where(profitdetail.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &DetailDeleteOne{builder}
+	return &ProfitDetailDeleteOne{builder}
 }
 
-// Query returns a query builder for Detail.
-func (c *DetailClient) Query() *DetailQuery {
-	return &DetailQuery{
+// Query returns a query builder for ProfitDetail.
+func (c *ProfitDetailClient) Query() *ProfitDetailQuery {
+	return &ProfitDetailQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Detail entity by its id.
-func (c *DetailClient) Get(ctx context.Context, id uuid.UUID) (*Detail, error) {
-	return c.Query().Where(detail.ID(id)).Only(ctx)
+// Get returns a ProfitDetail entity by its id.
+func (c *ProfitDetailClient) Get(ctx context.Context, id uuid.UUID) (*ProfitDetail, error) {
+	return c.Query().Where(profitdetail.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DetailClient) GetX(ctx context.Context, id uuid.UUID) *Detail {
+func (c *ProfitDetailClient) GetX(ctx context.Context, id uuid.UUID) *ProfitDetail {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -216,89 +223,89 @@ func (c *DetailClient) GetX(ctx context.Context, id uuid.UUID) *Detail {
 }
 
 // Hooks returns the client hooks.
-func (c *DetailClient) Hooks() []Hook {
-	hooks := c.hooks.Detail
-	return append(hooks[:len(hooks):len(hooks)], detail.Hooks[:]...)
+func (c *ProfitDetailClient) Hooks() []Hook {
+	hooks := c.hooks.ProfitDetail
+	return append(hooks[:len(hooks):len(hooks)], profitdetail.Hooks[:]...)
 }
 
-// GeneralClient is a client for the General schema.
-type GeneralClient struct {
+// ProfitGeneralClient is a client for the ProfitGeneral schema.
+type ProfitGeneralClient struct {
 	config
 }
 
-// NewGeneralClient returns a client for the General from the given config.
-func NewGeneralClient(c config) *GeneralClient {
-	return &GeneralClient{config: c}
+// NewProfitGeneralClient returns a client for the ProfitGeneral from the given config.
+func NewProfitGeneralClient(c config) *ProfitGeneralClient {
+	return &ProfitGeneralClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `general.Hooks(f(g(h())))`.
-func (c *GeneralClient) Use(hooks ...Hook) {
-	c.hooks.General = append(c.hooks.General, hooks...)
+// A call to `Use(f, g, h)` equals to `profitgeneral.Hooks(f(g(h())))`.
+func (c *ProfitGeneralClient) Use(hooks ...Hook) {
+	c.hooks.ProfitGeneral = append(c.hooks.ProfitGeneral, hooks...)
 }
 
-// Create returns a create builder for General.
-func (c *GeneralClient) Create() *GeneralCreate {
-	mutation := newGeneralMutation(c.config, OpCreate)
-	return &GeneralCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for ProfitGeneral.
+func (c *ProfitGeneralClient) Create() *ProfitGeneralCreate {
+	mutation := newProfitGeneralMutation(c.config, OpCreate)
+	return &ProfitGeneralCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of General entities.
-func (c *GeneralClient) CreateBulk(builders ...*GeneralCreate) *GeneralCreateBulk {
-	return &GeneralCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of ProfitGeneral entities.
+func (c *ProfitGeneralClient) CreateBulk(builders ...*ProfitGeneralCreate) *ProfitGeneralCreateBulk {
+	return &ProfitGeneralCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for General.
-func (c *GeneralClient) Update() *GeneralUpdate {
-	mutation := newGeneralMutation(c.config, OpUpdate)
-	return &GeneralUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for ProfitGeneral.
+func (c *ProfitGeneralClient) Update() *ProfitGeneralUpdate {
+	mutation := newProfitGeneralMutation(c.config, OpUpdate)
+	return &ProfitGeneralUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GeneralClient) UpdateOne(ge *General) *GeneralUpdateOne {
-	mutation := newGeneralMutation(c.config, OpUpdateOne, withGeneral(ge))
-	return &GeneralUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProfitGeneralClient) UpdateOne(pg *ProfitGeneral) *ProfitGeneralUpdateOne {
+	mutation := newProfitGeneralMutation(c.config, OpUpdateOne, withProfitGeneral(pg))
+	return &ProfitGeneralUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GeneralClient) UpdateOneID(id uuid.UUID) *GeneralUpdateOne {
-	mutation := newGeneralMutation(c.config, OpUpdateOne, withGeneralID(id))
-	return &GeneralUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProfitGeneralClient) UpdateOneID(id uuid.UUID) *ProfitGeneralUpdateOne {
+	mutation := newProfitGeneralMutation(c.config, OpUpdateOne, withProfitGeneralID(id))
+	return &ProfitGeneralUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for General.
-func (c *GeneralClient) Delete() *GeneralDelete {
-	mutation := newGeneralMutation(c.config, OpDelete)
-	return &GeneralDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for ProfitGeneral.
+func (c *ProfitGeneralClient) Delete() *ProfitGeneralDelete {
+	mutation := newProfitGeneralMutation(c.config, OpDelete)
+	return &ProfitGeneralDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *GeneralClient) DeleteOne(ge *General) *GeneralDeleteOne {
-	return c.DeleteOneID(ge.ID)
+func (c *ProfitGeneralClient) DeleteOne(pg *ProfitGeneral) *ProfitGeneralDeleteOne {
+	return c.DeleteOneID(pg.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GeneralClient) DeleteOneID(id uuid.UUID) *GeneralDeleteOne {
-	builder := c.Delete().Where(general.ID(id))
+func (c *ProfitGeneralClient) DeleteOneID(id uuid.UUID) *ProfitGeneralDeleteOne {
+	builder := c.Delete().Where(profitgeneral.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &GeneralDeleteOne{builder}
+	return &ProfitGeneralDeleteOne{builder}
 }
 
-// Query returns a query builder for General.
-func (c *GeneralClient) Query() *GeneralQuery {
-	return &GeneralQuery{
+// Query returns a query builder for ProfitGeneral.
+func (c *ProfitGeneralClient) Query() *ProfitGeneralQuery {
+	return &ProfitGeneralQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a General entity by its id.
-func (c *GeneralClient) Get(ctx context.Context, id uuid.UUID) (*General, error) {
-	return c.Query().Where(general.ID(id)).Only(ctx)
+// Get returns a ProfitGeneral entity by its id.
+func (c *ProfitGeneralClient) Get(ctx context.Context, id uuid.UUID) (*ProfitGeneral, error) {
+	return c.Query().Where(profitgeneral.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GeneralClient) GetX(ctx context.Context, id uuid.UUID) *General {
+func (c *ProfitGeneralClient) GetX(ctx context.Context, id uuid.UUID) *ProfitGeneral {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -307,7 +314,98 @@ func (c *GeneralClient) GetX(ctx context.Context, id uuid.UUID) *General {
 }
 
 // Hooks returns the client hooks.
-func (c *GeneralClient) Hooks() []Hook {
-	hooks := c.hooks.General
-	return append(hooks[:len(hooks):len(hooks)], general.Hooks[:]...)
+func (c *ProfitGeneralClient) Hooks() []Hook {
+	hooks := c.hooks.ProfitGeneral
+	return append(hooks[:len(hooks):len(hooks)], profitgeneral.Hooks[:]...)
+}
+
+// ProfitUnsoldClient is a client for the ProfitUnsold schema.
+type ProfitUnsoldClient struct {
+	config
+}
+
+// NewProfitUnsoldClient returns a client for the ProfitUnsold from the given config.
+func NewProfitUnsoldClient(c config) *ProfitUnsoldClient {
+	return &ProfitUnsoldClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `profitunsold.Hooks(f(g(h())))`.
+func (c *ProfitUnsoldClient) Use(hooks ...Hook) {
+	c.hooks.ProfitUnsold = append(c.hooks.ProfitUnsold, hooks...)
+}
+
+// Create returns a create builder for ProfitUnsold.
+func (c *ProfitUnsoldClient) Create() *ProfitUnsoldCreate {
+	mutation := newProfitUnsoldMutation(c.config, OpCreate)
+	return &ProfitUnsoldCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProfitUnsold entities.
+func (c *ProfitUnsoldClient) CreateBulk(builders ...*ProfitUnsoldCreate) *ProfitUnsoldCreateBulk {
+	return &ProfitUnsoldCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProfitUnsold.
+func (c *ProfitUnsoldClient) Update() *ProfitUnsoldUpdate {
+	mutation := newProfitUnsoldMutation(c.config, OpUpdate)
+	return &ProfitUnsoldUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProfitUnsoldClient) UpdateOne(pu *ProfitUnsold) *ProfitUnsoldUpdateOne {
+	mutation := newProfitUnsoldMutation(c.config, OpUpdateOne, withProfitUnsold(pu))
+	return &ProfitUnsoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProfitUnsoldClient) UpdateOneID(id uuid.UUID) *ProfitUnsoldUpdateOne {
+	mutation := newProfitUnsoldMutation(c.config, OpUpdateOne, withProfitUnsoldID(id))
+	return &ProfitUnsoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProfitUnsold.
+func (c *ProfitUnsoldClient) Delete() *ProfitUnsoldDelete {
+	mutation := newProfitUnsoldMutation(c.config, OpDelete)
+	return &ProfitUnsoldDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProfitUnsoldClient) DeleteOne(pu *ProfitUnsold) *ProfitUnsoldDeleteOne {
+	return c.DeleteOneID(pu.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProfitUnsoldClient) DeleteOneID(id uuid.UUID) *ProfitUnsoldDeleteOne {
+	builder := c.Delete().Where(profitunsold.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProfitUnsoldDeleteOne{builder}
+}
+
+// Query returns a query builder for ProfitUnsold.
+func (c *ProfitUnsoldClient) Query() *ProfitUnsoldQuery {
+	return &ProfitUnsoldQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProfitUnsold entity by its id.
+func (c *ProfitUnsoldClient) Get(ctx context.Context, id uuid.UUID) (*ProfitUnsold, error) {
+	return c.Query().Where(profitunsold.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProfitUnsoldClient) GetX(ctx context.Context, id uuid.UUID) *ProfitUnsold {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProfitUnsoldClient) Hooks() []Hook {
+	hooks := c.hooks.ProfitUnsold
+	return append(hooks[:len(hooks):len(hooks)], profitunsold.Hooks[:]...)
 }
