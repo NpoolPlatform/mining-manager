@@ -205,10 +205,10 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, e
 			stm = stm.AddToPlatform(toPlatform)
 		}
 		if in.TransferredToUser != nil {
-			stm = stm.AddToUser(transferredToUser)
+			stm = stm.AddTransferredToUser(transferredToUser)
 		}
 		if in.TransferredToPlatform != nil {
-			stm = stm.AddToPlatform(transferredToPlatform)
+			stm = stm.AddTransferredToPlatform(transferredToPlatform)
 		}
 
 		info, err = stm.Save(_ctx)
