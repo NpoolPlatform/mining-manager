@@ -205,6 +205,60 @@ func (pgu *ProfitGeneralUpdate) ClearToUser() *ProfitGeneralUpdate {
 	return pgu
 }
 
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (pgu *ProfitGeneralUpdate) SetTransferredToPlatform(d decimal.Decimal) *ProfitGeneralUpdate {
+	pgu.mutation.ResetTransferredToPlatform()
+	pgu.mutation.SetTransferredToPlatform(d)
+	return pgu
+}
+
+// SetNillableTransferredToPlatform sets the "transferred_to_platform" field if the given value is not nil.
+func (pgu *ProfitGeneralUpdate) SetNillableTransferredToPlatform(d *decimal.Decimal) *ProfitGeneralUpdate {
+	if d != nil {
+		pgu.SetTransferredToPlatform(*d)
+	}
+	return pgu
+}
+
+// AddTransferredToPlatform adds d to the "transferred_to_platform" field.
+func (pgu *ProfitGeneralUpdate) AddTransferredToPlatform(d decimal.Decimal) *ProfitGeneralUpdate {
+	pgu.mutation.AddTransferredToPlatform(d)
+	return pgu
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (pgu *ProfitGeneralUpdate) ClearTransferredToPlatform() *ProfitGeneralUpdate {
+	pgu.mutation.ClearTransferredToPlatform()
+	return pgu
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (pgu *ProfitGeneralUpdate) SetTransferredToUser(d decimal.Decimal) *ProfitGeneralUpdate {
+	pgu.mutation.ResetTransferredToUser()
+	pgu.mutation.SetTransferredToUser(d)
+	return pgu
+}
+
+// SetNillableTransferredToUser sets the "transferred_to_user" field if the given value is not nil.
+func (pgu *ProfitGeneralUpdate) SetNillableTransferredToUser(d *decimal.Decimal) *ProfitGeneralUpdate {
+	if d != nil {
+		pgu.SetTransferredToUser(*d)
+	}
+	return pgu
+}
+
+// AddTransferredToUser adds d to the "transferred_to_user" field.
+func (pgu *ProfitGeneralUpdate) AddTransferredToUser(d decimal.Decimal) *ProfitGeneralUpdate {
+	pgu.mutation.AddTransferredToUser(d)
+	return pgu
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (pgu *ProfitGeneralUpdate) ClearTransferredToUser() *ProfitGeneralUpdate {
+	pgu.mutation.ClearTransferredToUser()
+	return pgu
+}
+
 // Mutation returns the ProfitGeneralMutation object of the builder.
 func (pgu *ProfitGeneralUpdate) Mutation() *ProfitGeneralMutation {
 	return pgu.mutation
@@ -425,6 +479,46 @@ func (pgu *ProfitGeneralUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Column: profitgeneral.FieldToUser,
 		})
 	}
+	if value, ok := pgu.mutation.TransferredToPlatform(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if value, ok := pgu.mutation.AddedTransferredToPlatform(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if pgu.mutation.TransferredToPlatformCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if value, ok := pgu.mutation.TransferredToUser(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+	}
+	if value, ok := pgu.mutation.AddedTransferredToUser(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+	}
+	if pgu.mutation.TransferredToUserCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pgu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{profitgeneral.Label}
@@ -617,6 +711,60 @@ func (pguo *ProfitGeneralUpdateOne) AddToUser(d decimal.Decimal) *ProfitGeneralU
 // ClearToUser clears the value of the "to_user" field.
 func (pguo *ProfitGeneralUpdateOne) ClearToUser() *ProfitGeneralUpdateOne {
 	pguo.mutation.ClearToUser()
+	return pguo
+}
+
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (pguo *ProfitGeneralUpdateOne) SetTransferredToPlatform(d decimal.Decimal) *ProfitGeneralUpdateOne {
+	pguo.mutation.ResetTransferredToPlatform()
+	pguo.mutation.SetTransferredToPlatform(d)
+	return pguo
+}
+
+// SetNillableTransferredToPlatform sets the "transferred_to_platform" field if the given value is not nil.
+func (pguo *ProfitGeneralUpdateOne) SetNillableTransferredToPlatform(d *decimal.Decimal) *ProfitGeneralUpdateOne {
+	if d != nil {
+		pguo.SetTransferredToPlatform(*d)
+	}
+	return pguo
+}
+
+// AddTransferredToPlatform adds d to the "transferred_to_platform" field.
+func (pguo *ProfitGeneralUpdateOne) AddTransferredToPlatform(d decimal.Decimal) *ProfitGeneralUpdateOne {
+	pguo.mutation.AddTransferredToPlatform(d)
+	return pguo
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (pguo *ProfitGeneralUpdateOne) ClearTransferredToPlatform() *ProfitGeneralUpdateOne {
+	pguo.mutation.ClearTransferredToPlatform()
+	return pguo
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (pguo *ProfitGeneralUpdateOne) SetTransferredToUser(d decimal.Decimal) *ProfitGeneralUpdateOne {
+	pguo.mutation.ResetTransferredToUser()
+	pguo.mutation.SetTransferredToUser(d)
+	return pguo
+}
+
+// SetNillableTransferredToUser sets the "transferred_to_user" field if the given value is not nil.
+func (pguo *ProfitGeneralUpdateOne) SetNillableTransferredToUser(d *decimal.Decimal) *ProfitGeneralUpdateOne {
+	if d != nil {
+		pguo.SetTransferredToUser(*d)
+	}
+	return pguo
+}
+
+// AddTransferredToUser adds d to the "transferred_to_user" field.
+func (pguo *ProfitGeneralUpdateOne) AddTransferredToUser(d decimal.Decimal) *ProfitGeneralUpdateOne {
+	pguo.mutation.AddTransferredToUser(d)
+	return pguo
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (pguo *ProfitGeneralUpdateOne) ClearTransferredToUser() *ProfitGeneralUpdateOne {
+	pguo.mutation.ClearTransferredToUser()
 	return pguo
 }
 
@@ -862,6 +1010,46 @@ func (pguo *ProfitGeneralUpdateOne) sqlSave(ctx context.Context) (_node *ProfitG
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Column: profitgeneral.FieldToUser,
+		})
+	}
+	if value, ok := pguo.mutation.TransferredToPlatform(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if value, ok := pguo.mutation.AddedTransferredToPlatform(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if pguo.mutation.TransferredToPlatformCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+	}
+	if value, ok := pguo.mutation.TransferredToUser(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+	}
+	if value, ok := pguo.mutation.AddedTransferredToUser(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+	}
+	if pguo.mutation.TransferredToUserCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: profitgeneral.FieldTransferredToUser,
 		})
 	}
 	_node = &ProfitGeneral{config: pguo.config}

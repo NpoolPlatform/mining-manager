@@ -47,14 +47,16 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "ProfitGeneral",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			profitgeneral.FieldCreatedAt:  {Type: field.TypeUint32, Column: profitgeneral.FieldCreatedAt},
-			profitgeneral.FieldUpdatedAt:  {Type: field.TypeUint32, Column: profitgeneral.FieldUpdatedAt},
-			profitgeneral.FieldDeletedAt:  {Type: field.TypeUint32, Column: profitgeneral.FieldDeletedAt},
-			profitgeneral.FieldGoodID:     {Type: field.TypeUUID, Column: profitgeneral.FieldGoodID},
-			profitgeneral.FieldCoinTypeID: {Type: field.TypeUUID, Column: profitgeneral.FieldCoinTypeID},
-			profitgeneral.FieldAmount:     {Type: field.TypeFloat64, Column: profitgeneral.FieldAmount},
-			profitgeneral.FieldToPlatform: {Type: field.TypeFloat64, Column: profitgeneral.FieldToPlatform},
-			profitgeneral.FieldToUser:     {Type: field.TypeFloat64, Column: profitgeneral.FieldToUser},
+			profitgeneral.FieldCreatedAt:             {Type: field.TypeUint32, Column: profitgeneral.FieldCreatedAt},
+			profitgeneral.FieldUpdatedAt:             {Type: field.TypeUint32, Column: profitgeneral.FieldUpdatedAt},
+			profitgeneral.FieldDeletedAt:             {Type: field.TypeUint32, Column: profitgeneral.FieldDeletedAt},
+			profitgeneral.FieldGoodID:                {Type: field.TypeUUID, Column: profitgeneral.FieldGoodID},
+			profitgeneral.FieldCoinTypeID:            {Type: field.TypeUUID, Column: profitgeneral.FieldCoinTypeID},
+			profitgeneral.FieldAmount:                {Type: field.TypeFloat64, Column: profitgeneral.FieldAmount},
+			profitgeneral.FieldToPlatform:            {Type: field.TypeFloat64, Column: profitgeneral.FieldToPlatform},
+			profitgeneral.FieldToUser:                {Type: field.TypeFloat64, Column: profitgeneral.FieldToUser},
+			profitgeneral.FieldTransferredToPlatform: {Type: field.TypeFloat64, Column: profitgeneral.FieldTransferredToPlatform},
+			profitgeneral.FieldTransferredToUser:     {Type: field.TypeFloat64, Column: profitgeneral.FieldTransferredToUser},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -237,6 +239,16 @@ func (f *ProfitGeneralFilter) WhereToPlatform(p entql.Float64P) {
 // WhereToUser applies the entql float64 predicate on the to_user field.
 func (f *ProfitGeneralFilter) WhereToUser(p entql.Float64P) {
 	f.Where(p.Field(profitgeneral.FieldToUser))
+}
+
+// WhereTransferredToPlatform applies the entql float64 predicate on the transferred_to_platform field.
+func (f *ProfitGeneralFilter) WhereTransferredToPlatform(p entql.Float64P) {
+	f.Where(p.Field(profitgeneral.FieldTransferredToPlatform))
+}
+
+// WhereTransferredToUser applies the entql float64 predicate on the transferred_to_user field.
+func (f *ProfitGeneralFilter) WhereTransferredToUser(p entql.Float64P) {
+	f.Where(p.Field(profitgeneral.FieldTransferredToUser))
 }
 
 // addPredicate implements the predicateAdder interface.

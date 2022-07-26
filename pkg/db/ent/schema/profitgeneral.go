@@ -58,6 +58,18 @@ func (ProfitGeneral) Fields() []ent.Field {
 				dialect.MySQL: "decimal(37, 18)",
 			}).
 			Optional(),
+		field.Float("transferred_to_platform").
+			GoType(decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.MySQL: "decimal(37, 18)",
+			}).
+			Optional(),
+		field.Float("transferred_to_user").
+			GoType(decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.MySQL: "decimal(37, 18)",
+			}).
+			Optional(),
 	}
 }
 

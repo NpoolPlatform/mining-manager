@@ -925,27 +925,31 @@ func (m *ProfitDetailMutation) ResetEdge(name string) error {
 // ProfitGeneralMutation represents an operation that mutates the ProfitGeneral nodes in the graph.
 type ProfitGeneralMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	created_at     *uint32
-	addcreated_at  *int32
-	updated_at     *uint32
-	addupdated_at  *int32
-	deleted_at     *uint32
-	adddeleted_at  *int32
-	good_id        *uuid.UUID
-	coin_type_id   *uuid.UUID
-	amount         *decimal.Decimal
-	addamount      *decimal.Decimal
-	to_platform    *decimal.Decimal
-	addto_platform *decimal.Decimal
-	to_user        *decimal.Decimal
-	addto_user     *decimal.Decimal
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*ProfitGeneral, error)
-	predicates     []predicate.ProfitGeneral
+	op                         Op
+	typ                        string
+	id                         *uuid.UUID
+	created_at                 *uint32
+	addcreated_at              *int32
+	updated_at                 *uint32
+	addupdated_at              *int32
+	deleted_at                 *uint32
+	adddeleted_at              *int32
+	good_id                    *uuid.UUID
+	coin_type_id               *uuid.UUID
+	amount                     *decimal.Decimal
+	addamount                  *decimal.Decimal
+	to_platform                *decimal.Decimal
+	addto_platform             *decimal.Decimal
+	to_user                    *decimal.Decimal
+	addto_user                 *decimal.Decimal
+	transferred_to_platform    *decimal.Decimal
+	addtransferred_to_platform *decimal.Decimal
+	transferred_to_user        *decimal.Decimal
+	addtransferred_to_user     *decimal.Decimal
+	clearedFields              map[string]struct{}
+	done                       bool
+	oldValue                   func(context.Context) (*ProfitGeneral, error)
+	predicates                 []predicate.ProfitGeneral
 }
 
 var _ ent.Mutation = (*ProfitGeneralMutation)(nil)
@@ -1528,6 +1532,146 @@ func (m *ProfitGeneralMutation) ResetToUser() {
 	delete(m.clearedFields, profitgeneral.FieldToUser)
 }
 
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (m *ProfitGeneralMutation) SetTransferredToPlatform(d decimal.Decimal) {
+	m.transferred_to_platform = &d
+	m.addtransferred_to_platform = nil
+}
+
+// TransferredToPlatform returns the value of the "transferred_to_platform" field in the mutation.
+func (m *ProfitGeneralMutation) TransferredToPlatform() (r decimal.Decimal, exists bool) {
+	v := m.transferred_to_platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransferredToPlatform returns the old "transferred_to_platform" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitGeneralMutation) OldTransferredToPlatform(ctx context.Context) (v decimal.Decimal, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransferredToPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransferredToPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransferredToPlatform: %w", err)
+	}
+	return oldValue.TransferredToPlatform, nil
+}
+
+// AddTransferredToPlatform adds d to the "transferred_to_platform" field.
+func (m *ProfitGeneralMutation) AddTransferredToPlatform(d decimal.Decimal) {
+	if m.addtransferred_to_platform != nil {
+		*m.addtransferred_to_platform = m.addtransferred_to_platform.Add(d)
+	} else {
+		m.addtransferred_to_platform = &d
+	}
+}
+
+// AddedTransferredToPlatform returns the value that was added to the "transferred_to_platform" field in this mutation.
+func (m *ProfitGeneralMutation) AddedTransferredToPlatform() (r decimal.Decimal, exists bool) {
+	v := m.addtransferred_to_platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (m *ProfitGeneralMutation) ClearTransferredToPlatform() {
+	m.transferred_to_platform = nil
+	m.addtransferred_to_platform = nil
+	m.clearedFields[profitgeneral.FieldTransferredToPlatform] = struct{}{}
+}
+
+// TransferredToPlatformCleared returns if the "transferred_to_platform" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) TransferredToPlatformCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldTransferredToPlatform]
+	return ok
+}
+
+// ResetTransferredToPlatform resets all changes to the "transferred_to_platform" field.
+func (m *ProfitGeneralMutation) ResetTransferredToPlatform() {
+	m.transferred_to_platform = nil
+	m.addtransferred_to_platform = nil
+	delete(m.clearedFields, profitgeneral.FieldTransferredToPlatform)
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (m *ProfitGeneralMutation) SetTransferredToUser(d decimal.Decimal) {
+	m.transferred_to_user = &d
+	m.addtransferred_to_user = nil
+}
+
+// TransferredToUser returns the value of the "transferred_to_user" field in the mutation.
+func (m *ProfitGeneralMutation) TransferredToUser() (r decimal.Decimal, exists bool) {
+	v := m.transferred_to_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransferredToUser returns the old "transferred_to_user" field's value of the ProfitGeneral entity.
+// If the ProfitGeneral object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfitGeneralMutation) OldTransferredToUser(ctx context.Context) (v decimal.Decimal, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransferredToUser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransferredToUser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransferredToUser: %w", err)
+	}
+	return oldValue.TransferredToUser, nil
+}
+
+// AddTransferredToUser adds d to the "transferred_to_user" field.
+func (m *ProfitGeneralMutation) AddTransferredToUser(d decimal.Decimal) {
+	if m.addtransferred_to_user != nil {
+		*m.addtransferred_to_user = m.addtransferred_to_user.Add(d)
+	} else {
+		m.addtransferred_to_user = &d
+	}
+}
+
+// AddedTransferredToUser returns the value that was added to the "transferred_to_user" field in this mutation.
+func (m *ProfitGeneralMutation) AddedTransferredToUser() (r decimal.Decimal, exists bool) {
+	v := m.addtransferred_to_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (m *ProfitGeneralMutation) ClearTransferredToUser() {
+	m.transferred_to_user = nil
+	m.addtransferred_to_user = nil
+	m.clearedFields[profitgeneral.FieldTransferredToUser] = struct{}{}
+}
+
+// TransferredToUserCleared returns if the "transferred_to_user" field was cleared in this mutation.
+func (m *ProfitGeneralMutation) TransferredToUserCleared() bool {
+	_, ok := m.clearedFields[profitgeneral.FieldTransferredToUser]
+	return ok
+}
+
+// ResetTransferredToUser resets all changes to the "transferred_to_user" field.
+func (m *ProfitGeneralMutation) ResetTransferredToUser() {
+	m.transferred_to_user = nil
+	m.addtransferred_to_user = nil
+	delete(m.clearedFields, profitgeneral.FieldTransferredToUser)
+}
+
 // Where appends a list predicates to the ProfitGeneralMutation builder.
 func (m *ProfitGeneralMutation) Where(ps ...predicate.ProfitGeneral) {
 	m.predicates = append(m.predicates, ps...)
@@ -1547,7 +1691,7 @@ func (m *ProfitGeneralMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfitGeneralMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, profitgeneral.FieldCreatedAt)
 	}
@@ -1571,6 +1715,12 @@ func (m *ProfitGeneralMutation) Fields() []string {
 	}
 	if m.to_user != nil {
 		fields = append(fields, profitgeneral.FieldToUser)
+	}
+	if m.transferred_to_platform != nil {
+		fields = append(fields, profitgeneral.FieldTransferredToPlatform)
+	}
+	if m.transferred_to_user != nil {
+		fields = append(fields, profitgeneral.FieldTransferredToUser)
 	}
 	return fields
 }
@@ -1596,6 +1746,10 @@ func (m *ProfitGeneralMutation) Field(name string) (ent.Value, bool) {
 		return m.ToPlatform()
 	case profitgeneral.FieldToUser:
 		return m.ToUser()
+	case profitgeneral.FieldTransferredToPlatform:
+		return m.TransferredToPlatform()
+	case profitgeneral.FieldTransferredToUser:
+		return m.TransferredToUser()
 	}
 	return nil, false
 }
@@ -1621,6 +1775,10 @@ func (m *ProfitGeneralMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldToPlatform(ctx)
 	case profitgeneral.FieldToUser:
 		return m.OldToUser(ctx)
+	case profitgeneral.FieldTransferredToPlatform:
+		return m.OldTransferredToPlatform(ctx)
+	case profitgeneral.FieldTransferredToUser:
+		return m.OldTransferredToUser(ctx)
 	}
 	return nil, fmt.Errorf("unknown ProfitGeneral field %s", name)
 }
@@ -1686,6 +1844,20 @@ func (m *ProfitGeneralMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetToUser(v)
 		return nil
+	case profitgeneral.FieldTransferredToPlatform:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransferredToPlatform(v)
+		return nil
+	case profitgeneral.FieldTransferredToUser:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransferredToUser(v)
+		return nil
 	}
 	return fmt.Errorf("unknown ProfitGeneral field %s", name)
 }
@@ -1712,6 +1884,12 @@ func (m *ProfitGeneralMutation) AddedFields() []string {
 	if m.addto_user != nil {
 		fields = append(fields, profitgeneral.FieldToUser)
 	}
+	if m.addtransferred_to_platform != nil {
+		fields = append(fields, profitgeneral.FieldTransferredToPlatform)
+	}
+	if m.addtransferred_to_user != nil {
+		fields = append(fields, profitgeneral.FieldTransferredToUser)
+	}
 	return fields
 }
 
@@ -1732,6 +1910,10 @@ func (m *ProfitGeneralMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedToPlatform()
 	case profitgeneral.FieldToUser:
 		return m.AddedToUser()
+	case profitgeneral.FieldTransferredToPlatform:
+		return m.AddedTransferredToPlatform()
+	case profitgeneral.FieldTransferredToUser:
+		return m.AddedTransferredToUser()
 	}
 	return nil, false
 }
@@ -1783,6 +1965,20 @@ func (m *ProfitGeneralMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddToUser(v)
 		return nil
+	case profitgeneral.FieldTransferredToPlatform:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransferredToPlatform(v)
+		return nil
+	case profitgeneral.FieldTransferredToUser:
+		v, ok := value.(decimal.Decimal)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransferredToUser(v)
+		return nil
 	}
 	return fmt.Errorf("unknown ProfitGeneral numeric field %s", name)
 }
@@ -1805,6 +2001,12 @@ func (m *ProfitGeneralMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(profitgeneral.FieldToUser) {
 		fields = append(fields, profitgeneral.FieldToUser)
+	}
+	if m.FieldCleared(profitgeneral.FieldTransferredToPlatform) {
+		fields = append(fields, profitgeneral.FieldTransferredToPlatform)
+	}
+	if m.FieldCleared(profitgeneral.FieldTransferredToUser) {
+		fields = append(fields, profitgeneral.FieldTransferredToUser)
 	}
 	return fields
 }
@@ -1834,6 +2036,12 @@ func (m *ProfitGeneralMutation) ClearField(name string) error {
 		return nil
 	case profitgeneral.FieldToUser:
 		m.ClearToUser()
+		return nil
+	case profitgeneral.FieldTransferredToPlatform:
+		m.ClearTransferredToPlatform()
+		return nil
+	case profitgeneral.FieldTransferredToUser:
+		m.ClearTransferredToUser()
 		return nil
 	}
 	return fmt.Errorf("unknown ProfitGeneral nullable field %s", name)
@@ -1866,6 +2074,12 @@ func (m *ProfitGeneralMutation) ResetField(name string) error {
 		return nil
 	case profitgeneral.FieldToUser:
 		m.ResetToUser()
+		return nil
+	case profitgeneral.FieldTransferredToPlatform:
+		m.ResetTransferredToPlatform()
+		return nil
+	case profitgeneral.FieldTransferredToUser:
+		m.ResetTransferredToUser()
 		return nil
 	}
 	return fmt.Errorf("unknown ProfitGeneral field %s", name)

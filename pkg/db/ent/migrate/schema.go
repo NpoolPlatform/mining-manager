@@ -36,6 +36,8 @@ var (
 		{Name: "amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
 		{Name: "to_platform", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
 		{Name: "to_user", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "transferred_to_platform", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
+		{Name: "transferred_to_user", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37, 18)"}},
 	}
 	// ProfitGeneralsTable holds the schema information for the "profit_generals" table.
 	ProfitGeneralsTable = &schema.Table{

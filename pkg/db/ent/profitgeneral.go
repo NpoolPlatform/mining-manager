@@ -33,6 +33,10 @@ type ProfitGeneral struct {
 	ToPlatform decimal.Decimal `json:"to_platform,omitempty"`
 	// ToUser holds the value of the "to_user" field.
 	ToUser decimal.Decimal `json:"to_user,omitempty"`
+	// TransferredToPlatform holds the value of the "transferred_to_platform" field.
+	TransferredToPlatform decimal.Decimal `json:"transferred_to_platform,omitempty"`
+	// TransferredToUser holds the value of the "transferred_to_user" field.
+	TransferredToUser decimal.Decimal `json:"transferred_to_user,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,7 +44,7 @@ func (*ProfitGeneral) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profitgeneral.FieldAmount, profitgeneral.FieldToPlatform, profitgeneral.FieldToUser:
+		case profitgeneral.FieldAmount, profitgeneral.FieldToPlatform, profitgeneral.FieldToUser, profitgeneral.FieldTransferredToPlatform, profitgeneral.FieldTransferredToUser:
 			values[i] = new(decimal.Decimal)
 		case profitgeneral.FieldCreatedAt, profitgeneral.FieldUpdatedAt, profitgeneral.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
@@ -115,6 +119,18 @@ func (pg *ProfitGeneral) assignValues(columns []string, values []interface{}) er
 			} else if value != nil {
 				pg.ToUser = *value
 			}
+		case profitgeneral.FieldTransferredToPlatform:
+			if value, ok := values[i].(*decimal.Decimal); !ok {
+				return fmt.Errorf("unexpected type %T for field transferred_to_platform", values[i])
+			} else if value != nil {
+				pg.TransferredToPlatform = *value
+			}
+		case profitgeneral.FieldTransferredToUser:
+			if value, ok := values[i].(*decimal.Decimal); !ok {
+				return fmt.Errorf("unexpected type %T for field transferred_to_user", values[i])
+			} else if value != nil {
+				pg.TransferredToUser = *value
+			}
 		}
 	}
 	return nil
@@ -159,6 +175,10 @@ func (pg *ProfitGeneral) String() string {
 	builder.WriteString(fmt.Sprintf("%v", pg.ToPlatform))
 	builder.WriteString(", to_user=")
 	builder.WriteString(fmt.Sprintf("%v", pg.ToUser))
+	builder.WriteString(", transferred_to_platform=")
+	builder.WriteString(fmt.Sprintf("%v", pg.TransferredToPlatform))
+	builder.WriteString(", transferred_to_user=")
+	builder.WriteString(fmt.Sprintf("%v", pg.TransferredToUser))
 	builder.WriteByte(')')
 	return builder.String()
 }

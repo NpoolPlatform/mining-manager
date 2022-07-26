@@ -11,12 +11,14 @@ func Ent2Grpc(row *ent.ProfitGeneral) *npool.General {
 	}
 
 	return &npool.General{
-		ID:         row.ID.String(),
-		GoodID:     row.GoodID.String(),
-		CoinTypeID: row.CoinTypeID.String(),
-		Amount:     row.Amount.String(),
-		ToPlatform: row.ToPlatform.String(),
-		ToUser:     row.ToUser.String(),
+		ID:                    row.ID.String(),
+		GoodID:                row.GoodID.String(),
+		CoinTypeID:            row.CoinTypeID.String(),
+		Amount:                row.Amount.String(),
+		ToPlatform:            row.ToPlatform.String(),
+		ToUser:                row.ToUser.String(),
+		TransferredToPlatform: row.ToPlatform.String(),
+		TransferredToUser:     row.ToUser.String(),
 	}
 }
 

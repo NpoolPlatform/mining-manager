@@ -53,6 +53,8 @@ func Create(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, erro
 		c.SetAmount(decimal.NewFromInt(0))
 		c.SetToPlatform(decimal.NewFromInt(0))
 		c.SetToUser(decimal.NewFromInt(0))
+		c.SetTransferredToPlatform(decimal.NewFromInt(0))
+		c.SetTransferredToUser(decimal.NewFromInt(0))
 
 		info, err = c.Save(_ctx)
 		return err
@@ -96,6 +98,8 @@ func CreateBulk(ctx context.Context, in []*npool.GeneralReq) ([]*ent.ProfitGener
 			bulk[i].SetAmount(decimal.NewFromInt(0))
 			bulk[i].SetToPlatform(decimal.NewFromInt(0))
 			bulk[i].SetToUser(decimal.NewFromInt(0))
+			bulk[i].SetTransferredToPlatform(decimal.NewFromInt(0))
+			bulk[i].SetTransferredToUser(decimal.NewFromInt(0))
 		}
 		rows, err = tx.ProfitGeneral.CreateBulk(bulk...).Save(_ctx)
 		return err
@@ -149,6 +153,20 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, e
 				return err
 			}
 		}
+		transferredToPlatform := decimal.NewFromInt(0)
+		if in.TransferredToPlatform != nil {
+			transferredToPlatform, err = decimal.NewFromString(in.GetTransferredToPlatform())
+			if err != nil {
+				return err
+			}
+		}
+		transferredToUser := decimal.NewFromInt(0)
+		if in.TransferredToUser != nil {
+			transferredToUser, err = decimal.NewFromString(in.GetTransferredToUser())
+			if err != nil {
+				return err
+			}
+		}
 
 		if amount.Cmp(toPlatform.Add(toUser)) < 0 {
 			return fmt.Errorf("amount < toPlatform + toUser")
@@ -160,7 +178,19 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, e
 			return fmt.Errorf("toPlatform < 0")
 		}
 		if toUser.Cmp(decimal.NewFromInt(0)) < 0 {
-			return fmt.Errorf("toPlatform < 0")
+			return fmt.Errorf("toUser < 0")
+		}
+		if transferredToPlatform.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("transferredToPlatform < 0")
+		}
+		if transferredToUser.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("transferredToUser < 0")
+		}
+		if transferredToPlatform.Cmp(toPlatform) > 0 {
+			return fmt.Errorf("transferredToPlatform > toPlatform")
+		}
+		if transferredToUser.Cmp(toUser) > 0 {
+			return fmt.Errorf("transferredToUser > toUser")
 		}
 
 		stm := info.Update()
@@ -173,6 +203,12 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, e
 		}
 		if in.ToPlatform != nil {
 			stm = stm.AddToPlatform(toPlatform)
+		}
+		if in.TransferredToUser != nil {
+			stm = stm.AddToUser(transferredToUser)
+		}
+		if in.TransferredToPlatform != nil {
+			stm = stm.AddToPlatform(transferredToPlatform)
 		}
 
 		info, err = stm.Save(_ctx)

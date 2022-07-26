@@ -148,6 +148,20 @@ func ToUser(v decimal.Decimal) predicate.ProfitGeneral {
 	})
 }
 
+// TransferredToPlatform applies equality check predicate on the "transferred_to_platform" field. It's identical to TransferredToPlatformEQ.
+func TransferredToPlatform(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToUser applies equality check predicate on the "transferred_to_user" field. It's identical to TransferredToUserEQ.
+func TransferredToUser(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransferredToUser), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v uint32) predicate.ProfitGeneral {
 	return predicate.ProfitGeneral(func(s *sql.Selector) {
@@ -823,6 +837,186 @@ func ToUserIsNil() predicate.ProfitGeneral {
 func ToUserNotNil() predicate.ProfitGeneral {
 	return predicate.ProfitGeneral(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldToUser)))
+	})
+}
+
+// TransferredToPlatformEQ applies the EQ predicate on the "transferred_to_platform" field.
+func TransferredToPlatformEQ(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformNEQ applies the NEQ predicate on the "transferred_to_platform" field.
+func TransferredToPlatformNEQ(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformIn applies the In predicate on the "transferred_to_platform" field.
+func TransferredToPlatformIn(vs ...decimal.Decimal) predicate.ProfitGeneral {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTransferredToPlatform), v...))
+	})
+}
+
+// TransferredToPlatformNotIn applies the NotIn predicate on the "transferred_to_platform" field.
+func TransferredToPlatformNotIn(vs ...decimal.Decimal) predicate.ProfitGeneral {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTransferredToPlatform), v...))
+	})
+}
+
+// TransferredToPlatformGT applies the GT predicate on the "transferred_to_platform" field.
+func TransferredToPlatformGT(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformGTE applies the GTE predicate on the "transferred_to_platform" field.
+func TransferredToPlatformGTE(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformLT applies the LT predicate on the "transferred_to_platform" field.
+func TransferredToPlatformLT(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformLTE applies the LTE predicate on the "transferred_to_platform" field.
+func TransferredToPlatformLTE(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTransferredToPlatform), v))
+	})
+}
+
+// TransferredToPlatformIsNil applies the IsNil predicate on the "transferred_to_platform" field.
+func TransferredToPlatformIsNil() predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTransferredToPlatform)))
+	})
+}
+
+// TransferredToPlatformNotNil applies the NotNil predicate on the "transferred_to_platform" field.
+func TransferredToPlatformNotNil() predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTransferredToPlatform)))
+	})
+}
+
+// TransferredToUserEQ applies the EQ predicate on the "transferred_to_user" field.
+func TransferredToUserEQ(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserNEQ applies the NEQ predicate on the "transferred_to_user" field.
+func TransferredToUserNEQ(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserIn applies the In predicate on the "transferred_to_user" field.
+func TransferredToUserIn(vs ...decimal.Decimal) predicate.ProfitGeneral {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTransferredToUser), v...))
+	})
+}
+
+// TransferredToUserNotIn applies the NotIn predicate on the "transferred_to_user" field.
+func TransferredToUserNotIn(vs ...decimal.Decimal) predicate.ProfitGeneral {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTransferredToUser), v...))
+	})
+}
+
+// TransferredToUserGT applies the GT predicate on the "transferred_to_user" field.
+func TransferredToUserGT(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserGTE applies the GTE predicate on the "transferred_to_user" field.
+func TransferredToUserGTE(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserLT applies the LT predicate on the "transferred_to_user" field.
+func TransferredToUserLT(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserLTE applies the LTE predicate on the "transferred_to_user" field.
+func TransferredToUserLTE(v decimal.Decimal) predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTransferredToUser), v))
+	})
+}
+
+// TransferredToUserIsNil applies the IsNil predicate on the "transferred_to_user" field.
+func TransferredToUserIsNil() predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTransferredToUser)))
+	})
+}
+
+// TransferredToUserNotNil applies the NotNil predicate on the "transferred_to_user" field.
+func TransferredToUserNotNil() predicate.ProfitGeneral {
+	return predicate.ProfitGeneral(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTransferredToUser)))
 	})
 }
 

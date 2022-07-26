@@ -28,6 +28,10 @@ const (
 	FieldToPlatform = "to_platform"
 	// FieldToUser holds the string denoting the to_user field in the database.
 	FieldToUser = "to_user"
+	// FieldTransferredToPlatform holds the string denoting the transferred_to_platform field in the database.
+	FieldTransferredToPlatform = "transferred_to_platform"
+	// FieldTransferredToUser holds the string denoting the transferred_to_user field in the database.
+	FieldTransferredToUser = "transferred_to_user"
 	// Table holds the table name of the profitgeneral in the database.
 	Table = "profit_generals"
 )
@@ -43,6 +47,8 @@ var Columns = []string{
 	FieldAmount,
 	FieldToPlatform,
 	FieldToUser,
+	FieldTransferredToPlatform,
+	FieldTransferredToUser,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

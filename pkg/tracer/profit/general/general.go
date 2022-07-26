@@ -17,6 +17,8 @@ func trace(span trace1.Span, in *npool.GeneralReq, index int) trace1.Span {
 		attribute.String(fmt.Sprintf("Amount.%v", index), in.GetAmount()),
 		attribute.String(fmt.Sprintf("ToPlatform.%v", index), in.GetToPlatform()),
 		attribute.String(fmt.Sprintf("ToUser.%v", index), in.GetToUser()),
+		attribute.String(fmt.Sprintf("TransferredToPlatform.%v", index), in.GetTransferredToPlatform()),
+		attribute.String(fmt.Sprintf("TransferredToUser.%v", index), in.GetTransferredToUser()),
 	)
 	return span
 }
@@ -39,6 +41,10 @@ func TraceConds(span trace1.Span, in *npool.Conds) trace1.Span {
 		attribute.String("ToPlatform.Value", in.GetToPlatform().GetValue()),
 		attribute.String("ToUser.Op", in.GetToUser().GetOp()),
 		attribute.String("ToUser.Value", in.GetToUser().GetValue()),
+		attribute.String("TransferredToPlatform.Op", in.GetTransferredToPlatform().GetOp()),
+		attribute.String("TransferredToPlatform.Value", in.GetTransferredToPlatform().GetValue()),
+		attribute.String("TransferredToUser.Op", in.GetTransferredToUser().GetOp()),
+		attribute.String("TransferredToUser.Value", in.GetTransferredToUser().GetValue()),
 	)
 	return span
 }

@@ -136,6 +136,34 @@ func (pgc *ProfitGeneralCreate) SetNillableToUser(d *decimal.Decimal) *ProfitGen
 	return pgc
 }
 
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (pgc *ProfitGeneralCreate) SetTransferredToPlatform(d decimal.Decimal) *ProfitGeneralCreate {
+	pgc.mutation.SetTransferredToPlatform(d)
+	return pgc
+}
+
+// SetNillableTransferredToPlatform sets the "transferred_to_platform" field if the given value is not nil.
+func (pgc *ProfitGeneralCreate) SetNillableTransferredToPlatform(d *decimal.Decimal) *ProfitGeneralCreate {
+	if d != nil {
+		pgc.SetTransferredToPlatform(*d)
+	}
+	return pgc
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (pgc *ProfitGeneralCreate) SetTransferredToUser(d decimal.Decimal) *ProfitGeneralCreate {
+	pgc.mutation.SetTransferredToUser(d)
+	return pgc
+}
+
+// SetNillableTransferredToUser sets the "transferred_to_user" field if the given value is not nil.
+func (pgc *ProfitGeneralCreate) SetNillableTransferredToUser(d *decimal.Decimal) *ProfitGeneralCreate {
+	if d != nil {
+		pgc.SetTransferredToUser(*d)
+	}
+	return pgc
+}
+
 // SetID sets the "id" field.
 func (pgc *ProfitGeneralCreate) SetID(u uuid.UUID) *ProfitGeneralCreate {
 	pgc.mutation.SetID(u)
@@ -380,6 +408,22 @@ func (pgc *ProfitGeneralCreate) createSpec() (*ProfitGeneral, *sqlgraph.CreateSp
 		})
 		_node.ToUser = value
 	}
+	if value, ok := pgc.mutation.TransferredToPlatform(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToPlatform,
+		})
+		_node.TransferredToPlatform = value
+	}
+	if value, ok := pgc.mutation.TransferredToUser(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: profitgeneral.FieldTransferredToUser,
+		})
+		_node.TransferredToUser = value
+	}
 	return _node, _spec
 }
 
@@ -593,6 +637,54 @@ func (u *ProfitGeneralUpsert) AddToUser(v decimal.Decimal) *ProfitGeneralUpsert 
 // ClearToUser clears the value of the "to_user" field.
 func (u *ProfitGeneralUpsert) ClearToUser() *ProfitGeneralUpsert {
 	u.SetNull(profitgeneral.FieldToUser)
+	return u
+}
+
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsert) SetTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsert {
+	u.Set(profitgeneral.FieldTransferredToPlatform, v)
+	return u
+}
+
+// UpdateTransferredToPlatform sets the "transferred_to_platform" field to the value that was provided on create.
+func (u *ProfitGeneralUpsert) UpdateTransferredToPlatform() *ProfitGeneralUpsert {
+	u.SetExcluded(profitgeneral.FieldTransferredToPlatform)
+	return u
+}
+
+// AddTransferredToPlatform adds v to the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsert) AddTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsert {
+	u.Add(profitgeneral.FieldTransferredToPlatform, v)
+	return u
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsert) ClearTransferredToPlatform() *ProfitGeneralUpsert {
+	u.SetNull(profitgeneral.FieldTransferredToPlatform)
+	return u
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (u *ProfitGeneralUpsert) SetTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsert {
+	u.Set(profitgeneral.FieldTransferredToUser, v)
+	return u
+}
+
+// UpdateTransferredToUser sets the "transferred_to_user" field to the value that was provided on create.
+func (u *ProfitGeneralUpsert) UpdateTransferredToUser() *ProfitGeneralUpsert {
+	u.SetExcluded(profitgeneral.FieldTransferredToUser)
+	return u
+}
+
+// AddTransferredToUser adds v to the "transferred_to_user" field.
+func (u *ProfitGeneralUpsert) AddTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsert {
+	u.Add(profitgeneral.FieldTransferredToUser, v)
+	return u
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (u *ProfitGeneralUpsert) ClearTransferredToUser() *ProfitGeneralUpsert {
+	u.SetNull(profitgeneral.FieldTransferredToUser)
 	return u
 }
 
@@ -832,6 +924,62 @@ func (u *ProfitGeneralUpsertOne) UpdateToUser() *ProfitGeneralUpsertOne {
 func (u *ProfitGeneralUpsertOne) ClearToUser() *ProfitGeneralUpsertOne {
 	return u.Update(func(s *ProfitGeneralUpsert) {
 		s.ClearToUser()
+	})
+}
+
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertOne) SetTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.SetTransferredToPlatform(v)
+	})
+}
+
+// AddTransferredToPlatform adds v to the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertOne) AddTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.AddTransferredToPlatform(v)
+	})
+}
+
+// UpdateTransferredToPlatform sets the "transferred_to_platform" field to the value that was provided on create.
+func (u *ProfitGeneralUpsertOne) UpdateTransferredToPlatform() *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.UpdateTransferredToPlatform()
+	})
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertOne) ClearTransferredToPlatform() *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.ClearTransferredToPlatform()
+	})
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertOne) SetTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.SetTransferredToUser(v)
+	})
+}
+
+// AddTransferredToUser adds v to the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertOne) AddTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.AddTransferredToUser(v)
+	})
+}
+
+// UpdateTransferredToUser sets the "transferred_to_user" field to the value that was provided on create.
+func (u *ProfitGeneralUpsertOne) UpdateTransferredToUser() *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.UpdateTransferredToUser()
+	})
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertOne) ClearTransferredToUser() *ProfitGeneralUpsertOne {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.ClearTransferredToUser()
 	})
 }
 
@@ -1237,6 +1385,62 @@ func (u *ProfitGeneralUpsertBulk) UpdateToUser() *ProfitGeneralUpsertBulk {
 func (u *ProfitGeneralUpsertBulk) ClearToUser() *ProfitGeneralUpsertBulk {
 	return u.Update(func(s *ProfitGeneralUpsert) {
 		s.ClearToUser()
+	})
+}
+
+// SetTransferredToPlatform sets the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertBulk) SetTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.SetTransferredToPlatform(v)
+	})
+}
+
+// AddTransferredToPlatform adds v to the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertBulk) AddTransferredToPlatform(v decimal.Decimal) *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.AddTransferredToPlatform(v)
+	})
+}
+
+// UpdateTransferredToPlatform sets the "transferred_to_platform" field to the value that was provided on create.
+func (u *ProfitGeneralUpsertBulk) UpdateTransferredToPlatform() *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.UpdateTransferredToPlatform()
+	})
+}
+
+// ClearTransferredToPlatform clears the value of the "transferred_to_platform" field.
+func (u *ProfitGeneralUpsertBulk) ClearTransferredToPlatform() *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.ClearTransferredToPlatform()
+	})
+}
+
+// SetTransferredToUser sets the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertBulk) SetTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.SetTransferredToUser(v)
+	})
+}
+
+// AddTransferredToUser adds v to the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertBulk) AddTransferredToUser(v decimal.Decimal) *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.AddTransferredToUser(v)
+	})
+}
+
+// UpdateTransferredToUser sets the "transferred_to_user" field to the value that was provided on create.
+func (u *ProfitGeneralUpsertBulk) UpdateTransferredToUser() *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.UpdateTransferredToUser()
+	})
+}
+
+// ClearTransferredToUser clears the value of the "transferred_to_user" field.
+func (u *ProfitGeneralUpsertBulk) ClearTransferredToUser() *ProfitGeneralUpsertBulk {
+	return u.Update(func(s *ProfitGeneralUpsert) {
+		s.ClearTransferredToUser()
 	})
 }
 
