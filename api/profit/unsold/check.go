@@ -8,12 +8,12 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
+	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/unsold"
 
 	"github.com/google/uuid"
 )
 
-func validate(info *npool.DetailReq) error {
+func validate(info *npool.UnsoldReq) error {
 	if info.GoodID == nil {
 		logger.Sugar().Errorw("validate", "GoodID", info.GoodID)
 		return status.Error(codes.InvalidArgument, "GoodID is empty")
@@ -54,7 +54,7 @@ func validate(info *npool.DetailReq) error {
 	return nil
 }
 
-func duplicate(infos []*npool.DetailReq) error {
+func duplicate(infos []*npool.UnsoldReq) error {
 	keys := map[string]struct{}{}
 
 	for _, info := range infos {
