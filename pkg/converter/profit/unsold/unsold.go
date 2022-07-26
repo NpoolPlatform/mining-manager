@@ -6,6 +6,10 @@ import (
 )
 
 func Ent2Grpc(row *ent.ProfitUnsold) *npool.Unsold {
+	if row == nil {
+		return nil
+	}
+
 	return &npool.Unsold{
 		ID:          row.ID.String(),
 		GoodID:      row.GoodID.String(),
