@@ -186,10 +186,10 @@ func AddFields(ctx context.Context, in *npool.GeneralReq) (*ent.ProfitGeneral, e
 		if transferredToUser.Cmp(decimal.NewFromInt(0)) < 0 {
 			return fmt.Errorf("transferredToUser < 0")
 		}
-		if transferredToPlatform.Cmp(toPlatform) > 0 {
+		if transferredToPlatform.Add(info.TransferredToPlatform).Cmp(toPlatform.Add(info.ToPlatform)) > 0 {
 			return fmt.Errorf("transferredToPlatform > toPlatform")
 		}
-		if transferredToUser.Cmp(toUser) > 0 {
+		if transferredToUser.Add(info.TransferredToUser).Cmp(toUser.Add(info.ToUser)) > 0 {
 			return fmt.Errorf("transferredToUser > toUser")
 		}
 
