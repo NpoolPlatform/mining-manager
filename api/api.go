@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/NpoolPlatform/message/npool/miningmgr"
+	miningmgr "github.com/NpoolPlatform/message/npool/mining/mgr/v1"
 
 	"github.com/NpoolPlatform/mining-manager/api/profit/detail"
 	"github.com/NpoolPlatform/mining-manager/api/profit/general"

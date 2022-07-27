@@ -1,7 +1,7 @@
 package detail
 
 import (
-	"github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
+	"github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/detail"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

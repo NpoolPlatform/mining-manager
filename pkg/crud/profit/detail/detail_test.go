@@ -14,7 +14,7 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	valuedef "github.com/NpoolPlatform/message/npool"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/detail"
 	testinit "github.com/NpoolPlatform/mining-manager/pkg/testinit"
 	"github.com/google/uuid"
 

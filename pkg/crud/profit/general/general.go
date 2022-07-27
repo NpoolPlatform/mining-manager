@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/general"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/general"
 	"github.com/NpoolPlatform/mining-manager/pkg/db"
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 	general "github.com/NpoolPlatform/mining-manager/pkg/db/ent/profitgeneral"

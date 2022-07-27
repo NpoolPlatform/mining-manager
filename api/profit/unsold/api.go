@@ -1,7 +1,7 @@
 package unsold
 
 import (
-	"github.com/NpoolPlatform/message/npool/miningmgr/profit/unsold"
+	"github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/unsold"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

@@ -1,7 +1,7 @@
 package detail
 
 import (
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/detail"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/detail"
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 )
 

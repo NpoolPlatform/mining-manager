@@ -1,7 +1,7 @@
 package unsold
 
 import (
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/unsold"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/unsold"
 	"github.com/NpoolPlatform/mining-manager/pkg/db/ent"
 )
 

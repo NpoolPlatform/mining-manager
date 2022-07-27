@@ -17,7 +17,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/general"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/general"
 
 	"github.com/google/uuid"
 )

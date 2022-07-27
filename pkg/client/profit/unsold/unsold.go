@@ -9,7 +9,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/miningmgr/profit/unsold"
+	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/unsold"
 
 	constant "github.com/NpoolPlatform/mining-manager/pkg/message/const"
 )
