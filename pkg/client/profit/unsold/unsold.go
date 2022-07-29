@@ -9,14 +9,14 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/unsold"
+	npool "github.com/NpoolPlatform/message/npool/ledger/mgr/v1/mining/profit/unsold"
 
 	constant "github.com/NpoolPlatform/mining-manager/pkg/message/const"
 )
 
 var timeout = 10 * time.Second
 
-type handler func(context.Context, npool.ProfitUnsoldClient) (cruder.Any, error)
+type handler func(context.Context, npool.ManagerClient) (cruder.Any, error)
 
 func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 	_ctx, cancel := context.WithTimeout(ctx, timeout)
@@ -29,13 +29,13 @@ func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 
 	defer conn.Close()
 
-	cli := npool.NewProfitUnsoldClient(conn)
+	cli := npool.NewManagerClient(conn)
 
 	return handler(_ctx, cli)
 }
 
 func CreateUnsold(ctx context.Context, in *npool.UnsoldReq) (*npool.Unsold, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.CreateUnsold(ctx, &npool.CreateUnsoldRequest{
 			Info: in,
 		})
@@ -51,7 +51,7 @@ func CreateUnsold(ctx context.Context, in *npool.UnsoldReq) (*npool.Unsold, erro
 }
 
 func CreateUnsolds(ctx context.Context, in []*npool.UnsoldReq) ([]*npool.Unsold, error) {
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.CreateUnsolds(ctx, &npool.CreateUnsoldsRequest{
 			Infos: in,
 		})
@@ -67,7 +67,7 @@ func CreateUnsolds(ctx context.Context, in []*npool.UnsoldReq) ([]*npool.Unsold,
 }
 
 func GetUnsold(ctx context.Context, id string) (*npool.Unsold, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.GetUnsold(ctx, &npool.GetUnsoldRequest{
 			ID: id,
 		})
@@ -83,7 +83,7 @@ func GetUnsold(ctx context.Context, id string) (*npool.Unsold, error) {
 }
 
 func GetUnsoldOnly(ctx context.Context, conds *npool.Conds) (*npool.Unsold, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.GetUnsoldOnly(ctx, &npool.GetUnsoldOnlyRequest{
 			Conds: conds,
 		})
@@ -100,7 +100,7 @@ func GetUnsoldOnly(ctx context.Context, conds *npool.Conds) (*npool.Unsold, erro
 
 func GetUnsolds(ctx context.Context, conds *npool.Conds, limit, offset int32) ([]*npool.Unsold, uint32, error) {
 	var total uint32
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.GetUnsolds(ctx, &npool.GetUnsoldsRequest{
 			Conds:  conds,
 			Limit:  limit,
@@ -119,7 +119,7 @@ func GetUnsolds(ctx context.Context, conds *npool.Conds, limit, offset int32) ([
 }
 
 func ExistUnsold(ctx context.Context, id string) (bool, error) {
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.ExistUnsold(ctx, &npool.ExistUnsoldRequest{
 			ID: id,
 		})
@@ -135,7 +135,7 @@ func ExistUnsold(ctx context.Context, id string) (bool, error) {
 }
 
 func ExistUnsoldConds(ctx context.Context, conds *npool.Conds) (bool, error) {
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.ExistUnsoldConds(ctx, &npool.ExistUnsoldCondsRequest{
 			Conds: conds,
 		})
@@ -151,7 +151,7 @@ func ExistUnsoldConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 }
 
 func CountUnsolds(ctx context.Context, conds *npool.Conds) (uint32, error) {
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ProfitUnsoldClient) (cruder.Any, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.ManagerClient) (cruder.Any, error) {
 		resp, err := cli.CountUnsolds(ctx, &npool.CountUnsoldsRequest{
 			Conds: conds,
 		})

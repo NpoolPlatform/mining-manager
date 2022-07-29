@@ -1,18 +1,18 @@
 package general
 
 import (
-	"github.com/NpoolPlatform/message/npool/mining/mgr/v1/profit/general"
+	"github.com/NpoolPlatform/message/npool/ledger/mgr/v1/mining/profit/general"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	general.UnimplementedProfitGeneralServer
+	general.UnimplementedManagerServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	general.RegisterProfitGeneralServer(server, &Server{})
+	general.RegisterManagerServer(server, &Server{})
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {

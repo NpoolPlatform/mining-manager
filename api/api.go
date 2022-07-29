@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	miningmgr "github.com/NpoolPlatform/message/npool/mining/mgr/v1"
+	miningmgr "github.com/NpoolPlatform/message/npool/ledger/mgr/v1/mining"
 
 	"github.com/NpoolPlatform/mining-manager/api/profit/detail"
 	"github.com/NpoolPlatform/mining-manager/api/profit/general"
@@ -14,18 +14,18 @@ import (
 )
 
 type Server struct {
-	miningmgr.UnimplementedMiningManagerServer
+	miningmgr.UnimplementedManagerServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	miningmgr.RegisterMiningManagerServer(server, &Server{})
+	miningmgr.RegisterManagerServer(server, &Server{})
 	general.Register(server)
 	detail.Register(server)
 	unsold.Register(server)
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	if err := miningmgr.RegisterMiningManagerHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
+	if err := miningmgr.RegisterManagerHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
 		return err
 	}
 	if err := general.RegisterGateway(mux, endpoint, opts); err != nil {
