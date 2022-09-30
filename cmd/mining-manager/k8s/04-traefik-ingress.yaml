@@ -31,3 +31,5 @@ spec:
       http: *http_rules
     - host: api.ohhash.com
       http: *http_rules
+    - host: api.lpsecretbase.com
+      http: *http_rules
